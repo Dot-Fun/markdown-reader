@@ -166,6 +166,10 @@ body {
   color: var(--accent);
 }
 
+.app[data-theme='dark'] .bookmark-callout__text {
+  color: #fffdf7;
+}
+
 .bookmark-callout__dismiss {
   appearance: none;
   border: none;

@@ -21,6 +21,7 @@ const STORAGE_KEYS = {
   BOOKMARK_DISMISSED: 'dotfun-studio-bookmark-dismissed',
 };
 
+
 const sampleDoc = `# dotfun Field Kit
 
 Welcome to the **dotfun markdown studio**, your rapid space for shipping content, creative, and campaign notes in the dotfun house style.
@@ -89,6 +90,13 @@ Footnotes live here:
 
 [^human-first]: dotfun leads with “Human-first, unstoppable support” across its service model.
 [^transparent]: dotfun promises “No smoke. No mirrors. Just performance marketing that works.”`;
+
+function buildExportAttribution({ textColor, borderColor, accentColor }) {
+  const text = textColor && textColor.trim() ? textColor.trim() : '#4b4237';
+  const border = borderColor && borderColor.trim() ? borderColor.trim() : 'rgba(28, 26, 21, 0.14)';
+  const accent = accentColor && accentColor.trim() ? accentColor.trim() : '#ff4a2f';
+  return `\n<p class="export-attribution" style="margin-top:2.5rem;padding-top:1.5rem;font-size:0.92rem;color:${text};border-top:1px solid ${border};">Built with <a href="https://dotfun.co/tools/markdown-studio" target="_blank" rel="noopener" style="font-weight:600;text-decoration:none;color:${accent};">dotfun Markdown Studio</a>.</p>`;
+}
 
 // Configure marked for GitHub-flavored markdown and code highlighting
 marked.setOptions({
@@ -367,6 +375,13 @@ async function copyPreviewForDocs() {
   const hlTitle = getVar('--hljs-title', '#9b4dff');
   const hlComment = getVar('--hljs-comment', mutedColor);
 
+  const attributionHTML = buildExportAttribution({
+    textColor: mutedColor,
+    borderColor: tableBorder,
+    accentColor,
+  });
+  clone.insertAdjacentHTML('beforeend', attributionHTML);
+
   const fontSans = window.getComputedStyle(document.body).fontFamily || "'Inter', sans-serif";
   const fontMono = "'IBM Plex Mono','SFMono-Regular',Menlo,monospace";
 
@@ -428,6 +443,9 @@ p, li { color: ${textColor}; }
     .footnote-content p:not(:last-child) { margin-bottom: 0.6rem; }
     .footnote-backref { margin-left: 0.3rem; text-decoration: none; font-size: 0.85rem; color: ${accentColor}; display: inline-flex; vertical-align: baseline; }
     .footnote-backref:hover { text-decoration: underline; }
+    .export-attribution { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid ${tableBorder}; font-size: 0.92rem; color: ${mutedColor}; }
+    .export-attribution a { color: ${accentColor}; font-weight: 600; text-decoration: none; }
+    .export-attribution a:hover { text-decoration: underline; }
   `;
 
   const docHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${style}</style></head><body>${clone.innerHTML}</body></html>`;
@@ -508,7 +526,14 @@ btnDownload.addEventListener('click', () => {
 
 btnCopyHtml.addEventListener('click', async () => {
   try {
-    await navigator.clipboard.writeText(preview.innerHTML);
+    const computed = getComputedStyle(appRoot);
+    const attribution = buildExportAttribution({
+      textColor: computed.getPropertyValue('--muted'),
+      borderColor: computed.getPropertyValue('--table-border'),
+      accentColor: computed.getPropertyValue('--accent'),
+    });
+    const htmlWithAttribution = `${preview.innerHTML}${attribution}`;
+    await navigator.clipboard.writeText(htmlWithAttribution);
     flashMessage(btnCopyHtml, 'Copied!');
   } catch (error) {
     console.error('Clipboard copy failed', error);

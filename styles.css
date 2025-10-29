@@ -12,8 +12,18 @@
   --accent-soft: rgba(39, 94, 254, 0.1);
   --shadow: 0 12px 30px rgba(31, 36, 48, 0.08);
   --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-serif: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", serif;
   --font-mono: "IBM Plex Mono", "SFMono-Regular", "Menlo", monospace;
+  --code-inline-bg: rgba(31, 36, 48, 0.1);
+  --code-block-bg: rgba(39, 94, 254, 0.08);
+  --code-block-border: rgba(39, 94, 254, 0.16);
+  --table-border: rgba(28, 32, 44, 0.12);
+  --table-header-bg: rgba(39, 94, 254, 0.12);
+  --table-row-even: rgba(39, 94, 254, 0.06);
+  --hljs-keyword: #335dff;
+  --hljs-string: #2ca659;
+  --hljs-title: #9b4dff;
+  --hljs-number: #d97706;
+  --hljs-comment: rgba(31, 36, 48, 0.55);
 }
 
 .app[data-theme="dark"] {
@@ -29,6 +39,17 @@
   --accent: #82a0ff;
   --accent-soft: rgba(130, 160, 255, 0.18);
   --shadow: 0 18px 40px rgba(7, 9, 19, 0.42);
+  --code-inline-bg: rgba(130, 160, 255, 0.22);
+  --code-block-bg: rgba(22, 28, 48, 0.8);
+  --code-block-border: rgba(130, 160, 255, 0.2);
+  --table-border: rgba(255, 255, 255, 0.08);
+  --table-header-bg: rgba(130, 160, 255, 0.16);
+  --table-row-even: rgba(255, 255, 255, 0.04);
+  --hljs-keyword: #9fb6ff;
+  --hljs-string: #84e3a2;
+  --hljs-title: #c7a6ff;
+  --hljs-number: #f5b97d;
+  --hljs-comment: rgba(247, 247, 251, 0.55);
 }
 
 * {
@@ -235,7 +256,7 @@ body {
 }
 
 .workspace__pane--preview {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   line-height: 1.75;
   letter-spacing: 0.01em;
 }
@@ -260,7 +281,7 @@ body {
 .markdown-body h4,
 .markdown-body h5,
 .markdown-body h6 {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   line-height: 1.2;
   margin: 2rem 0 1rem;
   color: inherit;
@@ -315,19 +336,17 @@ body {
 .markdown-body code {
   font-family: var(--font-mono);
   font-size: 0.95rem;
-  background: rgba(127, 139, 172, 0.18);
-  padding: 0.15em 0.35em;
+  background: var(--code-inline-bg);
+  padding: 0.2em 0.45em;
   border-radius: 6px;
-}
-
-.app[data-theme="dark"] .markdown-body code {
-  background: rgba(17, 24, 39, 0.55);
+  color: inherit;
 }
 
 .markdown-body pre {
   margin: 1.8rem 0;
   padding: 1.5rem;
-  background: rgba(17, 24, 39, 0.06);
+  background: var(--code-block-bg);
+  border: 1px solid var(--code-block-border);
   border-radius: 16px;
   overflow-x: auto;
   font-family: var(--font-mono);
@@ -335,13 +354,55 @@ body {
   line-height: 1.6;
 }
 
-.app[data-theme="dark"] .markdown-body pre {
-  background: rgba(11, 14, 21, 0.58);
-}
-
 .markdown-body pre code {
   background: none;
   padding: 0;
+  display: block;
+}
+
+.markdown-body pre code.hljs {
+  color: var(--text);
+}
+
+.markdown-body .hljs-comment,
+.markdown-body .hljs-quote {
+  color: var(--hljs-comment);
+  font-style: italic;
+}
+
+.markdown-body .hljs-keyword,
+.markdown-body .hljs-selector-tag,
+.markdown-body .hljs-literal,
+.markdown-body .hljs-section,
+.markdown-body .hljs-link {
+  color: var(--hljs-keyword);
+  font-weight: 600;
+}
+
+.markdown-body .hljs-string,
+.markdown-body .hljs-template-variable,
+.markdown-body .hljs-addition {
+  color: var(--hljs-string);
+}
+
+.markdown-body .hljs-number,
+.markdown-body .hljs-attr,
+.markdown-body .hljs-attribute,
+.markdown-body .hljs-symbol,
+.markdown-body .hljs-built_in,
+.markdown-body .hljs-bullet {
+  color: var(--hljs-number);
+}
+
+.markdown-body .hljs-title,
+.markdown-body .hljs-name,
+.markdown-body .hljs-type,
+.markdown-body .hljs-selector-id,
+.markdown-body .hljs-selector-class,
+.markdown-body .hljs-meta,
+.markdown-body .hljs-doctag,
+.markdown-body .hljs-template-tag {
+  color: var(--hljs-title);
 }
 
 .markdown-body a {
@@ -357,16 +418,47 @@ body {
 
 .markdown-body table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin: 1.5rem 0;
   font-size: 0.95rem;
+  border: 1px solid var(--table-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
 }
 
 .markdown-body th,
 .markdown-body td {
   padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
   text-align: left;
+  border-right: 1px solid var(--table-border);
+  border-bottom: 1px solid var(--table-border);
+}
+
+.markdown-body th:last-child,
+.markdown-body td:last-child {
+  border-right: none;
+}
+
+.markdown-body tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.markdown-body table thead {
+  background: var(--table-header-bg);
+  color: inherit;
+}
+
+.markdown-body table thead th {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--table-border);
+}
+
+.markdown-body table tbody tr:nth-child(even) {
+  background: var(--table-row-even);
 }
 
 .markdown-body img {
@@ -409,7 +501,7 @@ textarea::-webkit-scrollbar-track,
 }
 
 .font-sample {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
   font-style: italic;
 }
 

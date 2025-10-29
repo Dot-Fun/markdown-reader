@@ -7,6 +7,7 @@ const btnDemo = document.getElementById('btn-load-demo');
 const fileInput = document.getElementById('file-input');
 const btnDownload = document.getElementById('btn-download');
 const btnCopyHtml = document.getElementById('btn-copy-html');
+const btnCopyDocs = document.getElementById('btn-copy-docs');
 const btnToggleTheme = document.getElementById('btn-toggle-theme');
 const hljsThemeLight = document.getElementById('hljs-theme-light');
 const hljsThemeDark = document.getElementById('hljs-theme-dark');
@@ -22,7 +23,7 @@ Craft beautifully legible notes with **Markdown Atelier**, a light, typographica
 
 ## Why you'll enjoy it
 
-- Crisp, spacious typography pairing \*Source Serif 4\* with _Inter_
+- Crisp, spacious typography powered by _Inter_ with \`IBM Plex Mono\` for code
 - Real-time preview with automatic syntax highlighting
 - Handy actions for importing, exporting, or copying your work
 - Thoughtful light & dark themes that honor your system preference
@@ -126,6 +127,97 @@ function toggleHighlightStyles(theme) {
   }
 }
 
+async function copyPreviewForDocs() {
+  const computed = getComputedStyle(appRoot);
+  const getVar = (name, fallback) => {
+    const value = computed.getPropertyValue(name);
+    return value ? value.trim() : fallback;
+  };
+
+  const clone = preview.cloneNode(true);
+  clone.removeAttribute('id');
+
+  const textColor = getVar('--text', '#1f2430');
+  const backgroundColor = getVar('--surface', '#ffffff');
+  const accentColor = getVar('--accent', '#275efe');
+  const accentSoft = getVar('--accent-soft', 'rgba(39, 94, 254, 0.1)');
+  const mutedColor = getVar('--muted', 'rgba(31, 36, 48, 0.6)');
+  const codeInlineBg = getVar('--code-inline-bg', 'rgba(31, 36, 48, 0.1)');
+  const codeBlockBg = getVar('--code-block-bg', '#eef2ff');
+  const codeBlockBorder = getVar('--code-block-border', 'rgba(39, 94, 254, 0.16)');
+  const tableBorder = getVar('--table-border', 'rgba(28, 32, 44, 0.12)');
+  const tableHeaderBg = getVar('--table-header-bg', 'rgba(39, 94, 254, 0.12)');
+  const tableRowEven = getVar('--table-row-even', 'rgba(39, 94, 254, 0.06)');
+  const hlKeyword = getVar('--hljs-keyword', accentColor);
+  const hlString = getVar('--hljs-string', '#2ca659');
+  const hlNumber = getVar('--hljs-number', '#d97706');
+  const hlTitle = getVar('--hljs-title', '#9b4dff');
+  const hlComment = getVar('--hljs-comment', mutedColor);
+
+  const fontSans = window.getComputedStyle(document.body).fontFamily || "'Inter', sans-serif";
+  const fontMono = "'IBM Plex Mono','SFMono-Regular',Menlo,monospace";
+
+  const style = `
+    body { margin: 0; padding: 0; font-family: ${fontSans}; color: ${textColor}; background: ${backgroundColor}; line-height: 1.65; }
+    h1, h2, h3, h4, h5, h6 { font-family: ${fontSans}; line-height: 1.2; margin: 2rem 0 1rem; }
+    p, li { color: ${textColor}; }
+    ul, ol { margin: 1.2rem 0 1.2rem 1.6rem; padding-left: 1.2rem; }
+    a { color: ${accentColor}; text-decoration: none; font-weight: 600; }
+    a:hover { text-decoration: underline; }
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+    blockquote { margin: 1.8rem 0; padding: 1rem 1.5rem; border-left: 4px solid ${accentColor}; background: ${accentSoft}; color: ${textColor}; }
+    blockquote p { margin: 0; }
+    code { font-family: ${fontMono}; background: ${codeInlineBg}; padding: 0.2em 0.4em; border-radius: 6px; }
+    pre { background: ${codeBlockBg}; border: 1px solid ${codeBlockBorder}; border-radius: 16px; padding: 1.5rem; overflow-x: auto; font-family: ${fontMono}; font-size: 0.95rem; line-height: 1.6; }
+    pre code { background: none; padding: 0; display: block; }
+    pre code.hljs { color: ${textColor}; }
+    .hljs-comment,
+    .hljs-quote { color: ${hlComment}; font-style: italic; }
+    .hljs-keyword,
+    .hljs-selector-tag,
+    .hljs-literal,
+    .hljs-section,
+    .hljs-link { color: ${hlKeyword}; font-weight: 600; }
+    .hljs-string,
+    .hljs-template-variable,
+    .hljs-addition { color: ${hlString}; }
+    .hljs-number,
+    .hljs-attr,
+    .hljs-attribute,
+    .hljs-symbol,
+    .hljs-built_in,
+    .hljs-bullet { color: ${hlNumber}; }
+    .hljs-title,
+    .hljs-name,
+    .hljs-type,
+    .hljs-selector-id,
+    .hljs-selector-class,
+    .hljs-meta,
+    .hljs-doctag,
+    .hljs-template-tag { color: ${hlTitle}; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid ${tableBorder}; border-radius: 16px; overflow: hidden; background: ${backgroundColor}; }
+    thead { background: ${tableHeaderBg}; color: ${textColor}; text-transform: uppercase; letter-spacing: 0.04em; }
+    th, td { padding: 0.75rem 1rem; border-right: 1px solid ${tableBorder}; border-bottom: 1px solid ${tableBorder}; text-align: left; }
+    th:last-child, td:last-child { border-right: none; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) { background: ${tableRowEven}; }
+    caption { color: ${mutedColor}; font-size: 0.85rem; caption-side: bottom; padding-top: 0.75rem; }
+  `;
+
+  const docHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${style}</style></head><body>${clone.innerHTML}</body></html>`;
+  const plainText = clone.textContent || '';
+
+  if (navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof ClipboardItem !== 'undefined') {
+    const htmlBlob = new Blob([docHtml], { type: 'text/html' });
+    const textBlob = new Blob([plainText], { type: 'text/plain' });
+    await navigator.clipboard.write([new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob })]);
+    return;
+  }
+
+  await navigator.clipboard.writeText(plainText);
+}
+
 function hydrateTheme() {
   let theme = 'light';
   try {
@@ -196,6 +288,18 @@ btnCopyHtml.addEventListener('click', async () => {
     flashMessage(btnCopyHtml, 'Copy failed');
   }
 });
+
+if (btnCopyDocs) {
+  btnCopyDocs.addEventListener('click', async () => {
+    try {
+      await copyPreviewForDocs();
+      flashMessage(btnCopyDocs, 'Copied!');
+    } catch (error) {
+      console.error('Docs copy failed', error);
+      flashMessage(btnCopyDocs, 'Copy failed');
+    }
+  });
+}
 
 function flashMessage(target, message) {
   const original = target.textContent;

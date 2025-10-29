@@ -19,36 +19,70 @@ const STORAGE_KEYS = {
 
 const sampleDoc = `# Markdown Atelier
 
-Craft beautifully legible notes with **Markdown Atelier**, a light, typographically rich companion for focused writing.
+Craft beautifully legible notes with **Markdown Atelier**, a polished markdown companion for focused writing.
 
-## Why you'll enjoy it
+---
 
-- Crisp, spacious typography powered by _Inter_ with \`IBM Plex Mono\` for code
-- Real-time preview with automatic syntax highlighting
-- Handy actions for importing, exporting, or copying your work
-- Thoughtful light & dark themes that honor your system preference
+## Core styling
+
+- **Bold**, _italic_, ~~strikethrough~~, and \`inline code\`
+- Links like [Markdown Guide](https://www.markdownguide.org/) open in a new tab
+- Automatic typographic quotes like “this” and emoji support ✨
 
 > “Typography is the craft of endowing human language with a durable visual form.” — Robert Bringhurst
+>
+> > Blockquotes can also nest when you need them.
 
-### Sample code
+## Lists, tasks, and nesting
+
+1. Ordered lists render with the correct numbers even when you skip ahead
+2. Nested content is easy:
+   - Bullet
+     - Sub-bullet
+   - [x] Completed tasks
+   - [ ] Tasks still open
+3. Autolinks: <https://example.com>
+
+## Code snippets
 
 \`\`\`js
-function titleCase(str) {
-  return str
+export function titleCase(input) {
+  return input
     .toLowerCase()
-    .split(/\s+/)
+    .split(/\\s+/)
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
 \`\`\`
 
-### Tables too
+\`\`\`bash
+# Install dependencies and start the dev server
+npm install
+npm run dev -- --open
+\`\`\`
 
-| Task              | Status    | Notes               |
-| ----------------- | --------- | ------------------- |
-| Draft copy        | Complete  | Feels confident     |
-| Polish typography | In review | Consider larger type|
-| Publish changelog | Pending   | Waiting on review   |
+## Tables with alignment
+
+| Feature            | Support Level | Notes                          |
+| :----------------- | :-----------: | ------------------------------ |
+| Tables             |     ✅        | Column alignment via colons    |
+| Task lists         |     ✅        | Perfect for checklists         |
+| Footnotes[^1]      |     ✅        | Useful for references          |
+| Syntax highlighting|     ✅        | Powered by highlight.js        |
+
+[^1]: Footnotes render at the bottom with links back to their references.
+
+## Media & horizontal rules
+
+![Mood board showing a writing desk](https://dummyimage.com/880x240/1f2430/ffffff&text=Markdown+Atelier)
+
+---
+
+## Callouts with inline HTML
+
+<aside>
+  <strong>Pro tip:</strong> Drag & drop markdown files anywhere in the window to load them instantly.
+</aside>
 
 Happy writing!`;
 

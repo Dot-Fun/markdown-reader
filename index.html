@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Markdown Atelier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css"
+      id="hljs-theme-light"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/tokyo-night-dark.min.css"
+      id="hljs-theme-dark"
+      disabled
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app" data-theme="light">
+      <header class="app__header">
+        <div class="brand">
+          <span aria-hidden="true">✦</span>
+          <div>
+            <h1>Markdown Atelier</h1>
+            <p>Poised typography for inspired notes.</p>
+          </div>
+        </div>
+        <div class="toolbar" role="group" aria-label="Editor controls">
+          <button type="button" class="toolbar__button" id="btn-load-demo">
+            Demo
+          </button>
+          <label class="toolbar__button file-label">
+            <input type="file" id="file-input" accept=".md,.markdown,.txt" />
+            Import
+          </label>
+          <button type="button" class="toolbar__button" id="btn-download">
+            Export .md
+          </button>
+          <button type="button" class="toolbar__button" id="btn-copy-html">
+            Copy HTML
+          </button>
+          <button
+            type="button"
+            class="toolbar__button toolbar__button--icon"
+            id="btn-toggle-theme"
+            aria-label="Toggle theme"
+          >
+            <span class="theme-icon" data-theme="light" aria-hidden="true">☀︎</span>
+            <span class="theme-icon" data-theme="dark" aria-hidden="true">☾</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="workspace__pane workspace__pane--editor" aria-label="Markdown editor">
+          <div class="pane-header">
+            <h2>Markdown</h2>
+            <span class="pane-meta" id="editor-stats">0 words</span>
+          </div>
+          <textarea id="editor" spellcheck="false" aria-label="Markdown input"></textarea>
+        </section>
+        <section class="workspace__pane workspace__pane--preview" aria-live="polite" aria-label="Preview">
+          <div class="pane-header">
+            <h2>Preview</h2>
+            <div class="pane-meta">
+              <span id="theme-indicator">Light</span>
+            </div>
+          </div>
+          <article id="preview" class="markdown-body"></article>
+        </section>
+      </main>
+
+      <footer class="app__footer">
+        <p>
+          Built to deliver a refined markdown experience. Typography tuned with
+          <span class="font-sample">Inter</span>, <span class="font-sample">Source Serif 4</span>, and
+          <span class="font-sample">IBM Plex Mono</span> for beautiful prose and code.
+        </p>
+      </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.2/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
+    <script src="app.js" defer></script>
+  </body>
+</html>

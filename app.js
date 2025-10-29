@@ -12,79 +12,83 @@ const btnToggleTheme = document.getElementById('btn-toggle-theme');
 const hljsThemeLight = document.getElementById('hljs-theme-light');
 const hljsThemeDark = document.getElementById('hljs-theme-dark');
 
+let currentTaskItems = [];
+let isPreviewSyncing = false;
+
 const STORAGE_KEYS = {
-  THEME: 'markdown-atelier-theme',
-  CONTENT: 'markdown-atelier-content',
+  THEME: 'dotfun-studio-theme',
+  CONTENT: 'dotfun-studio-content',
+  BOOKMARK_DISMISSED: 'dotfun-studio-bookmark-dismissed',
 };
 
-const sampleDoc = `# Markdown Atelier
+const sampleDoc = `# dotfun Field Kit
 
-Craft beautifully legible notes with **Markdown Atelier**, a polished markdown companion for focused writing.
+Welcome to the **dotfun markdown studio**, your rapid space for shipping content, creative, and campaign notes in the dotfun house style.
 
 ---
 
-## Core styling
+## Why dotfun wins
 
-- **Bold**, _italic_, ~~strikethrough~~, and \`inline code\`
-- Links like [Markdown Guide](https://www.markdownguide.org/) open in a new tab
-- Automatic typographic quotes like “this” and emoji support ✨
+- Human-first, unstoppable support that keeps partners in motion[^human-first]
+- Transparent dashes: no smoke, no mirrors, just accountable growth[^transparent]
+- We always **run good**, *look good*, and ~~feel average~~ feel good
 
-> “Typography is the craft of endowing human language with a durable visual form.” — Robert Bringhurst
+> “Great marketing is equal parts rigor and play. dotfun keeps both on the table.”
 >
-> > Blockquotes can also nest when you need them.
+> > Nested quotes let you surface creative direction alongside data calls.
 
-## Lists, tasks, and nesting
+## Plays & rituals
 
-1. Ordered lists render with the correct numbers even when you skip ahead
-2. Nested content is easy:
-   - Bullet
-     - Sub-bullet
-   - [x] Completed tasks
-   - [ ] Tasks still open
-3. Autolinks: <https://example.com>
+1. Run Good — align strategy with measurable revenue lift
+2. Look Good — tell the story with thumb-stopping creative
+3. Feel Good — nurture teams, founders, and audiences with human energy
 
-## Code snippets
+- [x] Kickoff brief captured in Notion
+- [ ] Post-launch retro scheduled
+- Inline autolinks keep collaboration fast: <https://dotfun.co>
+
+## Code snippets & ops
 
 \`\`\`js
-export function titleCase(input) {
-  return input
-    .toLowerCase()
-    .split(/\\s+/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+const lifecycle = ['Run Good', 'Look Good', 'Feel Good'];
+
+export function dotfunPulse(team) {
+  return lifecycle.map(phase => \`\${team} → \${phase}\`);
 }
 \`\`\`
 
 \`\`\`bash
-# Install dependencies and start the dev server
-npm install
-npm run dev -- --open
+# Clone the playbook and start locally
+git clone https://github.com/dotfunhq/marketing-os.git
+cd marketing-os
+npm install && npm run dev
 \`\`\`
 
-## Tables with alignment
+## Palette cheatsheet
 
-| Feature            | Support Level | Notes                          |
-| :----------------- | :-----------: | ------------------------------ |
-| Tables             |     ✅        | Column alignment via colons    |
-| Task lists         |     ✅        | Perfect for checklists         |
-| Footnotes[^1]      |     ✅        | Useful for references          |
-| Syntax highlighting|     ✅        | Powered by highlight.js        |
+| Tone            |   Hex    | Energy                                |
+| :-------------- | :------: | ------------------------------------- |
+| Run Good Red    | #FF4A2F  | Primary topspin for CTAs + headlines  |
+| Neutral Sand    | #F6EEDC  | Background canvas for every story     |
+| Accent Ink      | #1C1A15  | High-contrast copy + frames           |
+| Highlight Peach | #FFB156  | Warm pops for data points + badges    |
 
-[^1]: Footnotes render at the bottom with links back to their references.
+## Media drop
 
-## Media & horizontal rules
-
-![Mood board showing a writing desk](https://dummyimage.com/880x240/1f2430/ffffff&text=Markdown+Atelier)
+![dotfun collage with gradient lighting](https://dummyimage.com/880x240/120d2e/ffffff&text=dotfun+creative)
 
 ---
 
-## Callouts with inline HTML
+## Callouts & embeds
 
 <aside>
-  <strong>Pro tip:</strong> Drag & drop markdown files anywhere in the window to load them instantly.
+  <strong>Play nice with partners:</strong> dotfun pairs human energy with automation so every brief ships faster.
 </aside>
 
-Happy writing!`;
+Footnotes live here:
+
+[^human-first]: dotfun leads with “Human-first, unstoppable support” across its service model.
+[^transparent]: dotfun promises “No smoke. No mirrors. Just performance marketing that works.”`;
 
 // Configure marked for GitHub-flavored markdown and code highlighting
 marked.setOptions({
@@ -98,11 +102,145 @@ marked.setOptions({
   },
 });
 
+function extractFootnotes(source) {
+  const lines = source.split(/\r?\n/);
+  const bodyLines = [];
+  const footnotes = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index];
+    const match = line.match(/^\[\^([^\]]+)\]:\s?(.*)$/);
+    if (match) {
+      const id = match[1];
+      let content = match[2] || '';
+      index += 1;
+
+      while (index < lines.length) {
+        const nextLine = lines[index];
+
+        if (/^( {2,}|\t)/.test(nextLine)) {
+          content += '\n' + nextLine.replace(/^(?: {2,4}|\t)/, '');
+          index += 1;
+          continue;
+        }
+
+        if (nextLine.trim() === '') {
+          const lookahead = lines[index + 1];
+          if (lookahead && /^( {2,}|\t)/.test(lookahead)) {
+            content += '\n';
+            index += 1;
+            continue;
+          }
+          index += 1;
+        }
+
+        break;
+      }
+
+      footnotes.push({ id, content: content.trim() });
+      continue;
+    }
+
+    bodyLines.push(line);
+    index += 1;
+  }
+
+  if (!footnotes.length) {
+    return { body: source, footnotes: [] };
+  }
+
+  return { body: bodyLines.join('\n'), footnotes };
+}
+
+function preprocessFootnotes(markdown) {
+  const { body, footnotes } = extractFootnotes(markdown);
+  if (!footnotes.length) {
+    return { markdown: markdown, footnotes: [] };
+  }
+
+  const ordering = new Map();
+  footnotes.forEach((note, idx) => {
+    ordering.set(note.id, idx + 1);
+  });
+
+  const processed = body.replace(/\[\^([^\]]+)\]/g, (match, id) => {
+    const number = ordering.get(id);
+    if (!number) return match;
+    return `<sup id="fnref-${id}" class="footnote-ref"><a href="#fn-${id}">${number}</a></sup>`;
+  });
+
+  return {
+    markdown: processed,
+    footnotes: footnotes.map((note, idx) => ({
+      ...note,
+      number: idx + 1,
+    })),
+  };
+}
+
+function renderFootnoteSection(footnotes) {
+  if (!footnotes.length) return '';
+
+  const items = footnotes
+    .map(note => {
+      const container = document.createElement('div');
+      container.innerHTML = marked.parse(note.content).trim();
+      const paragraphs = container.querySelectorAll('p');
+      const anchorHtml = ` <a href="#fnref-${note.id}" class="footnote-backref" aria-label="Back to content">↩︎</a>`;
+      if (paragraphs.length) {
+        const lastParagraph = paragraphs[paragraphs.length - 1];
+        lastParagraph.insertAdjacentHTML('beforeend', anchorHtml);
+      } else {
+        container.insertAdjacentHTML(
+          'beforeend',
+          `<p>${anchorHtml.trim()}</p>`
+        );
+      }
+      return `<li id="fn-${note.id}"><div class="footnote-content">${container.innerHTML}</div></li>`;
+    })
+    .join('');
+
+  return `<section class="footnotes" aria-label="Footnotes"><hr /><ol>${items}</ol></section>`;
+}
+
+function extractTaskItems(markdown) {
+  const regex = /^(\s*[-*+]\s+|\s*\d+\.\s+)\[( |x|X)\].*$/gm;
+  const tasks = [];
+  let match;
+  while ((match = regex.exec(markdown)) !== null) {
+    tasks.push({
+      start: match.index,
+      end: regex.lastIndex,
+      text: match[0],
+      checked: match[2].toLowerCase() === 'x',
+    });
+  }
+  return tasks;
+}
+
+function updateTaskCheckboxStates() {
+  const checkboxes = preview.querySelectorAll('li input[type="checkbox"]');
+  checkboxes.forEach((checkbox, index) => {
+    const task = currentTaskItems[index];
+    checkbox.removeAttribute('disabled');
+    if (!task) return;
+    checkbox.dataset.taskIndex = String(index);
+    checkbox.checked = task.checked;
+  });
+}
+
 function updatePreview(markdown) {
-  const html = DOMPurify.sanitize(marked.parse(markdown));
-  preview.innerHTML = html;
+  currentTaskItems = extractTaskItems(markdown);
+  const { markdown: processedMarkdown, footnotes } = preprocessFootnotes(markdown);
+  const mainHtml = marked.parse(processedMarkdown);
+  const footnoteHtml = renderFootnoteSection(footnotes);
+  const sanitized = DOMPurify.sanitize(mainHtml + footnoteHtml);
+  preview.innerHTML = sanitized;
+  updateTaskCheckboxStates();
   preview.querySelectorAll('pre code').forEach(block => {
     hljs.highlightElement(block);
+    decorateCodeBlock(block);
   });
 }
 
@@ -161,6 +299,44 @@ function toggleHighlightStyles(theme) {
   }
 }
 
+function formatLanguageLabel(lang) {
+  if (!lang) return 'Code';
+  return lang
+    .replace(/language-/i, '')
+    .replace(/[\W_]+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function decorateCodeBlock(block) {
+  const pre = block.closest('pre');
+  if (!pre) return;
+  const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
+  const detected =
+    languageClass ||
+    block.getAttribute('data-language') ||
+    (block.result && block.result.language && `language-${block.result.language}`);
+  const label = formatLanguageLabel(detected);
+  pre.dataset.lang = label;
+}
+
+function toggleTaskItem(index, checked) {
+  const task = currentTaskItems[index];
+  if (!task) return;
+  const original = editor.value;
+  const before = original.slice(0, task.start);
+  const after = original.slice(task.end);
+  const updatedLine = task.text.replace(/\[( |x|X)\]/, checked ? '[x]' : '[ ]');
+  const nextValue = before + updatedLine + after;
+  const cursorStart = editor.selectionStart;
+  const cursorEnd = editor.selectionEnd;
+  isPreviewSyncing = true;
+  editor.value = nextValue;
+  editor.setSelectionRange(cursorStart, cursorEnd);
+  editor.dispatchEvent(new Event('input'));
+  isPreviewSyncing = false;
+}
+
 async function copyPreviewForDocs() {
   const computed = getComputedStyle(appRoot);
   const getVar = (name, fallback) => {
@@ -177,8 +353,11 @@ async function copyPreviewForDocs() {
   const accentSoft = getVar('--accent-soft', 'rgba(39, 94, 254, 0.1)');
   const mutedColor = getVar('--muted', 'rgba(31, 36, 48, 0.6)');
   const codeInlineBg = getVar('--code-inline-bg', 'rgba(31, 36, 48, 0.1)');
+  const codeInlineColor = getVar('--code-inline-color', '#0c7c3f');
   const codeBlockBg = getVar('--code-block-bg', '#eef2ff');
   const codeBlockBorder = getVar('--code-block-border', 'rgba(39, 94, 254, 0.16)');
+  const codeBadgeBg = getVar('--code-badge-bg', 'rgba(39, 94, 254, 0.12)');
+  const codeBadgeText = getVar('--code-badge-text', '#1f2430');
   const tableBorder = getVar('--table-border', 'rgba(28, 32, 44, 0.12)');
   const tableHeaderBg = getVar('--table-header-bg', 'rgba(39, 94, 254, 0.12)');
   const tableRowEven = getVar('--table-row-even', 'rgba(39, 94, 254, 0.06)');
@@ -194,7 +373,7 @@ async function copyPreviewForDocs() {
   const style = `
     body { margin: 0; padding: 0; font-family: ${fontSans}; color: ${textColor}; background: ${backgroundColor}; line-height: 1.65; }
     h1, h2, h3, h4, h5, h6 { font-family: ${fontSans}; line-height: 1.2; margin: 2rem 0 1rem; }
-    p, li { color: ${textColor}; }
+p, li { color: ${textColor}; }
     ul, ol { margin: 1.2rem 0 1.2rem 1.6rem; padding-left: 1.2rem; }
     a { color: ${accentColor}; text-decoration: none; font-weight: 600; }
     a:hover { text-decoration: underline; }
@@ -202,8 +381,8 @@ async function copyPreviewForDocs() {
     em { font-style: italic; }
     blockquote { margin: 1.8rem 0; padding: 1rem 1.5rem; border-left: 4px solid ${accentColor}; background: ${accentSoft}; color: ${textColor}; }
     blockquote p { margin: 0; }
-    code { font-family: ${fontMono}; background: ${codeInlineBg}; padding: 0.2em 0.4em; border-radius: 6px; }
-    pre { background: ${codeBlockBg}; border: 1px solid ${codeBlockBorder}; border-radius: 16px; padding: 1.5rem; overflow-x: auto; font-family: ${fontMono}; font-size: 0.95rem; line-height: 1.6; }
+    code { font-family: ${fontMono}; background: ${codeInlineBg}; padding: 0.2em 0.4em; border-radius: 6px; color: ${codeInlineColor}; font-weight: 600; }
+    pre { background: ${codeBlockBg}; border: 1px solid ${codeBlockBorder}; border-radius: 16px; padding: 1.5rem; padding-top: 2.6rem; overflow-x: auto; font-family: ${fontMono}; font-size: 0.95rem; line-height: 1.6; position: relative; }
     pre code { background: none; padding: 0; display: block; }
     pre code.hljs { color: ${textColor}; }
     .hljs-comment,
@@ -230,6 +409,7 @@ async function copyPreviewForDocs() {
     .hljs-meta,
     .hljs-doctag,
     .hljs-template-tag { color: ${hlTitle}; }
+    pre[data-lang]::before { content: attr(data-lang); position: absolute; top: 0.75rem; right: 1rem; padding: 0.3rem 0.75rem; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 999px; background: ${codeBadgeBg}; color: ${codeBadgeText}; font-family: ${fontSans}; }
     table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid ${tableBorder}; border-radius: 16px; overflow: hidden; background: ${backgroundColor}; }
     thead { background: ${tableHeaderBg}; color: ${textColor}; text-transform: uppercase; letter-spacing: 0.04em; }
     th, td { padding: 0.75rem 1rem; border-right: 1px solid ${tableBorder}; border-bottom: 1px solid ${tableBorder}; text-align: left; }
@@ -237,6 +417,17 @@ async function copyPreviewForDocs() {
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:nth-child(even) { background: ${tableRowEven}; }
     caption { color: ${mutedColor}; font-size: 0.85rem; caption-side: bottom; padding-top: 0.75rem; }
+    .footnote-ref { font-size: 0.75em; vertical-align: super; }
+    .footnote-ref a { color: ${accentColor}; text-decoration: none; font-weight: 600; }
+    .footnote-ref a:hover { text-decoration: underline; }
+    .footnotes { margin-top: 2.5rem; font-size: 0.9rem; color: ${mutedColor}; }
+    .footnotes hr { border: none; border-top: 1px solid ${tableBorder}; margin-bottom: 1.5rem; }
+    .footnotes ol { margin: 0; padding-left: 1.5rem; }
+    .footnotes li { line-height: 1.6; margin-bottom: 0.75rem; }
+    .footnote-content p { margin: 0; }
+    .footnote-content p:not(:last-child) { margin-bottom: 0.6rem; }
+    .footnote-backref { margin-left: 0.3rem; text-decoration: none; font-size: 0.85rem; color: ${accentColor}; display: inline-flex; vertical-align: baseline; }
+    .footnote-backref:hover { text-decoration: underline; }
   `;
 
   const docHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${style}</style></head><body>${clone.innerHTML}</body></html>`;
@@ -271,7 +462,9 @@ editor.addEventListener('input', event => {
   const value = event.target.value;
   updatePreview(value);
   updateStats(value);
-  persistContent(value);
+  if (!isPreviewSyncing) {
+    persistContent(value);
+  }
 });
 
 btnDemo.addEventListener('click', () => {
@@ -306,7 +499,7 @@ btnDownload.addEventListener('click', () => {
   const link = document.createElement('a');
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   link.href = url;
-  link.download = `markdown-atelier-${timestamp}.md`;
+  link.download = `dotfun-studio-${timestamp}.md`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -334,6 +527,16 @@ if (btnCopyDocs) {
     }
   });
 }
+
+preview.addEventListener('change', event => {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') {
+    return;
+  }
+  const index = Number(target.dataset.taskIndex ?? '-1');
+  if (Number.isNaN(index) || index < 0) return;
+  toggleTaskItem(index, target.checked);
+});
 
 function flashMessage(target, message) {
   const original = target.textContent;
@@ -420,3 +623,50 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// Bookmark toast notification
+const bookmarkCallout = document.getElementById('bookmark-callout');
+const dismissBookmark = document.getElementById('dismiss-bookmark');
+
+// Timer in milliseconds (60000 = 1 minute)
+const BOOKMARK_TOAST_DELAY = 60000;
+
+function showBookmarkToast() {
+  try {
+    const dismissed = localStorage.getItem(STORAGE_KEYS.BOOKMARK_DISMISSED);
+    if (dismissed === 'true') {
+      return;
+    }
+  } catch (error) {
+    console.warn('Unable to check bookmark toast state:', error);
+  }
+
+  setTimeout(() => {
+    if (bookmarkCallout) {
+      bookmarkCallout.classList.add('is-visible');
+    }
+  }, BOOKMARK_TOAST_DELAY);
+}
+
+function hideBookmarkToast() {
+  if (!bookmarkCallout) return;
+
+  bookmarkCallout.classList.remove('is-visible');
+
+  try {
+    localStorage.setItem(STORAGE_KEYS.BOOKMARK_DISMISSED, 'true');
+  } catch (error) {
+    console.warn('Unable to save bookmark toast state:', error);
+  }
+
+  setTimeout(() => {
+    bookmarkCallout.classList.add('is-hidden');
+  }, 400);
+}
+
+if (dismissBookmark) {
+  dismissBookmark.addEventListener('click', hideBookmarkToast);
+}
+
+// Initialize bookmark toast
+showBookmarkToast();

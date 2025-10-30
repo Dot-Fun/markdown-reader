@@ -76,7 +76,7 @@ test('brand glyph renders as a fixed circle', () => {
 });
 
 test('setTheme propagates the theme to both app and body datasets', () => {
-  const js = read('app-core.js');
+  const js = read('app-core-runtime.js');
   assert.ok(
     /appRoot\.dataset\.theme\s*=\s*theme;/.test(js),
     'setTheme should continue writing to the app root dataset'

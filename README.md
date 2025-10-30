@@ -5,7 +5,8 @@ It’s a static web app composed of three files:
 
 - `index.html` – Markup and DOM structure.
 - `styles.css` – Dotfun-themed styling, including dark-mode tokens and component rules.
-- `app-core.js` – Core logic (markdown parsing, preview pipeline, tokens, helpers, copy/export flows).
+- `app-core-base.js` – DOM lookups, tokens, colour utilities, preview CSS generator, default settings.
+- `app-core-runtime.js` – Markdown parsing, preview pipeline, export helpers, theme + bookmark toast logic.
 - `app-init.js` – Startup wiring (event listeners, drag/drop, theme hydration, bookmark toast bootstrap).
 
 No build tooling is required; open `index.html` in a browser to run the experience.
@@ -16,16 +17,16 @@ No build tooling is required; open `index.html` in a browser to run the experien
 
 | Capability | Implementation | Notes |
 | --- | --- | --- |
-| Markdown parsing + sanitisation | `app-core.js` (`marked`, `DOMPurify`) | Configured for GFM (GitHub-Flavored Markdown). |
-| Syntax highlighting | `app-core.js` `highlight.js` + CSS tokens | Theme toggles between light/dark via CSS variables. |
+| Markdown parsing + sanitisation | `app-core-runtime.js` (`marked`, `DOMPurify`) | Configured for GFM (GitHub-Flavored Markdown). |
+| Syntax highlighting | `app-core-runtime.js` `highlight.js` + CSS tokens | Theme toggles between light/dark via CSS variables. |
 | Task list sync | `extractTaskItems`, `toggleTaskItem`, `preview` `change` listener | Clicking a checkbox in the preview rewrites the editor markdown so source and preview stay aligned. |
 | Footnotes | `preprocessFootnotes`, `renderFootnoteSection` | Renders references and keeps the ↩︎ link inline with content. |
 | Copy actions | `app-init.js` click handlers | Copy HTML appends an attribution footer. Copy for Docs clones the preview, injects inline styles + attribution, writes HTML and plaintext to the clipboard. |
-| Bookmark toast | Styles in `styles.css` (`.bookmark-callout`)* + timers in `app-core.js` / wiring in `app-init.js` | Toast reveals after 60s, explains keyboard shortcuts, and respects dismiss state via localStorage. |
+| Bookmark toast | Styles in `styles.css` (`.bookmark-callout`)* + timers in `app-core-runtime.js` / wiring in `app-init.js` | Toast reveals after 60s, explains keyboard shortcuts, and respects dismiss state via localStorage. |
 | Preview settings modal | `.settings__sheet`, `.settings__content`, `settingsPreview` helpers | Modal now mirrors live preview tokens and has its own scroll container; close button is positioned outside scroll area. |
 | Dotfun feature list | `index.html` (`.app__features`) | SEO-oriented content block after the footer. |
 
-> \*The toast itself is injected and controlled by the helpers in `app-core.js` (search for `"bookmarkCallout"`) with wiring in `app-init.js`.
+> \*The toast itself is injected and controlled by the helpers in `app-core-runtime.js` (search for `"bookmarkCallout"`) with wiring in `app-init.js`.
 
 ---
 
@@ -39,7 +40,7 @@ No build tooling is required; open `index.html` in a browser to run the experien
 
 ### Implementation Notes (Oct 2025)
 
-- `setTheme` in `app-core.js` mirrors the active theme onto both `.app` and `body` via `dataset.theme`. This ensures sibling UI (e.g., the bookmark callout appended after the app container) inherits the correct dark-mode token set. When adding new theme-aware elements outside `.app`, rely on the shared CSS variables instead of duplicating colour declarations.
+- `setTheme` in `app-core-runtime.js` mirrors the active theme onto both `.app` and `body` via `dataset.theme`. This ensures sibling UI (e.g., the bookmark callout appended after the app container) inherits the correct dark-mode token set. When adding new theme-aware elements outside `.app`, rely on the shared CSS variables instead of duplicating colour declarations.
 - The bookmark toast (`.bookmark-callout`) uses `--text`/`--accent` tokens for all states. Dark-mode overrides simply adjust the underlying custom property, keeping light/dark parity without duplicating component rules.
 - Settings dropdowns (`.settings__field select`) keep the iOS-style double-linear-gradient caret. The background position is centered vertically, and the dark-theme override swaps in a warm neutral surface (`rgba(41, 29, 18, 0.92)`) with subtle border contrast. When adjusting form controls, tweak the token-driven background first, then the gradients for the caret if alignment shifts.
 - Range sliders and other inputs reuse the same accent variables; favour adjusting the tokens near the top of `styles.css` to propagate changes across the modal rather than editing individual component colours.
@@ -60,7 +61,7 @@ The script is deliberately vanilla (no frameworks). If you add new functionality
 
 ## How to Extend
 
-- **New Markdown Samples** – adjust `sampleDoc` in `app-core.js`.
+- **New Markdown Samples** – adjust `sampleDoc` in `app-core-base.js`.
 - **New toolbar actions** – add markup to `index.html`, style in `styles.css`, wire listeners in `app-init.js`.
 - **Additional markdown features** – configure `marked` or post-process parsed HTML in `updatePreview`.
 - **Exports** – tweak `buildExportAttribution` or inline styles in the copy handler if target platforms (Docs, Notion, etc.) change.
@@ -87,11 +88,11 @@ Manual checklist when editing core behaviour:
   - Verifies the bookmark callout action + text overrides continue using the shared token pipeline in dark mode.
   - Locks the settings dropdown caret alignment and dark-surface background colour so future tweaks don’t drift.
   - Ensures the header brand glyph stays a perfect 42px circle with the nested accent dot.
-  - Checks `setTheme` in `app-core.js` keeps mirroring theme state to `document.body.dataset.theme`.
+  - Checks `setTheme` in `app-core-runtime.js` keeps mirroring theme state to `document.body.dataset.theme`.
 
 ---
 
 ## Notes for Future Automation
 
-- If you need bundling/minification again, add a lightweight npm script (e.g., `esbuild` or `terser`) but keep committed output in `app-core.js` / `app-init.js` / `styles.css` for readability.
+- If you need bundling/minification again, add a lightweight npm script (e.g., `esbuild` or `terser`) but keep committed output in `app-core-base.js` / `app-core-runtime.js` / `app-init.js` / `styles.css` for readability.
 - Consider adding unit tests around helpers (e.g., task parsing, footnotes) with a minimal Jest setup if complexity grows.

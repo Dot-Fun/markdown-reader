@@ -1,5 +1,55 @@
+const dotfunNamespace = (globalThis.dotfunMarkdown = globalThis.dotfunMarkdown || {});
+
+function requireDotfunDependency(key, expectedType) {
+  const value = dotfunNamespace[key];
+  if (value === undefined || value === null) {
+    throw new Error(
+      `dotfun Markdown Studio: missing dependency "${key}". Ensure scripts execute in order.`
+    );
+  }
+  if (expectedType === 'function' && typeof value !== 'function') {
+    throw new Error(
+      `dotfun Markdown Studio: dependency "${key}" is not callable as expected (${typeof value}).`
+    );
+  }
+  return value;
+}
+
+function getPreviewSettings() {
+  return dotfunNamespace.previewSettings;
+}
+
+function getCurrentTaskItems() {
+  const tasks = dotfunNamespace.currentTaskItems;
+  return Array.isArray(tasks) ? tasks : [];
+}
+
+function setCurrentTaskItems(items) {
+  dotfunNamespace.currentTaskItems = Array.isArray(items) ? items : [];
+}
+
+function setPreviewSyncing(state) {
+  dotfunNamespace.isPreviewSyncing = Boolean(state);
+}
+
+const appRoot = requireDotfunDependency('appRoot');
+const editor = requireDotfunDependency('editor');
+const preview = requireDotfunDependency('preview');
+const stats = requireDotfunDependency('stats');
+const themeIndicator = requireDotfunDependency('themeIndicator');
+const markSettingsPreviewDirty = requireDotfunDependency('markSettingsPreviewDirty', 'function');
+const applyPreviewSettings = requireDotfunDependency('applyPreviewSettings', 'function');
+const computePreviewTokens = requireDotfunDependency('computePreviewTokens', 'function');
+const getPreviewTokens = requireDotfunDependency('getPreviewTokens', 'function');
+const buildExportAttribution = requireDotfunDependency('buildExportAttribution', 'function');
+const generateExportCss = requireDotfunDependency('generateExportCss', 'function');
+const STORAGE_KEYS = requireDotfunDependency('STORAGE_KEYS');
+const sampleDoc = requireDotfunDependency('sampleDoc');
+const hljsThemeLight = dotfunNamespace.hljsThemeLight || null;
+const hljsThemeDark = dotfunNamespace.hljsThemeDark || null;
+
 function generateExportPayload(target = 'fragment') {
-  const tokens = getPreviewTokens() || computePreviewTokens(previewSettings);
+  const tokens = getPreviewTokens() || computePreviewTokens(getPreviewSettings());
   if (!tokens) {
     return {
       htmlFragment: preview.innerHTML,
@@ -170,8 +220,9 @@ function extractTaskItems(markdown) {
 
 function updateTaskCheckboxStates() {
   const checkboxes = preview.querySelectorAll('li input[type="checkbox"]');
+  const tasks = getCurrentTaskItems();
   checkboxes.forEach((checkbox, index) => {
-    const task = currentTaskItems[index];
+    const task = tasks[index];
     checkbox.removeAttribute('disabled');
     if (!task) return;
     checkbox.dataset.taskIndex = String(index);
@@ -180,7 +231,8 @@ function updateTaskCheckboxStates() {
 }
 
 function updatePreview(markdown) {
-  currentTaskItems = extractTaskItems(markdown);
+  const tasks = extractTaskItems(markdown);
+  setCurrentTaskItems(tasks);
   const { markdown: processedMarkdown, footnotes } = preprocessFootnotes(markdown);
   const mainHtml = marked.parse(processedMarkdown);
   const footnoteHtml = renderFootnoteSection(footnotes);
@@ -237,7 +289,7 @@ function setTheme(nextTheme) {
   } catch (error) {
     console.warn('Unable to persist theme preference:', error);
   }
-  applyPreviewSettings(previewSettings);
+  applyPreviewSettings(getPreviewSettings());
   toggleHighlightStyles(theme);
 }
 
@@ -273,7 +325,7 @@ function decorateCodeBlock(block) {
 }
 
 function toggleTaskItem(index, checked) {
-  const task = currentTaskItems[index];
+  const task = getCurrentTaskItems()[index];
   if (!task) return;
   const original = editor.value;
   const before = original.slice(0, task.start);
@@ -282,11 +334,11 @@ function toggleTaskItem(index, checked) {
   const nextValue = before + updatedLine + after;
   const cursorStart = editor.selectionStart;
   const cursorEnd = editor.selectionEnd;
-  isPreviewSyncing = true;
+  setPreviewSyncing(true);
   editor.value = nextValue;
   editor.setSelectionRange(cursorStart, cursorEnd);
   editor.dispatchEvent(new Event('input'));
-  isPreviewSyncing = false;
+  setPreviewSyncing(false);
 }
 
 async function copyPreviewForDocs() {
@@ -383,4 +435,34 @@ function hideBookmarkToast() {
   setTimeout(() => {
     bookmarkCallout.classList.add('is-hidden');
   }, 400);
+}
+
+Object.assign(dotfunNamespace, {
+  generateExportPayload,
+  copyPreviewHtml,
+  extractFootnotes,
+  preprocessFootnotes,
+  renderFootnoteSection,
+  extractTaskItems,
+  updateTaskCheckboxStates,
+  updatePreview,
+  updateStats,
+  persistContent,
+  hydrateEditor,
+  setTheme,
+  toggleTaskItem,
+  copyPreviewForDocs,
+  hydrateTheme,
+  flashMessage,
+  handleDrop,
+  showBookmarkToast,
+  hideBookmarkToast,
+  decorateCodeBlock,
+});
+
+dotfunNamespace.dismissBookmark = dismissBookmark;
+dotfunNamespace.bookmarkCallout = bookmarkCallout;
+dotfunNamespace.runtimeReady = true;
+if (typeof dotfunNamespace._notifyReady === 'function') {
+  dotfunNamespace._notifyReady();
 }

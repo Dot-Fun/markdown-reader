@@ -1313,3 +1313,74 @@ function generateExportCss(tokens, target = 'fragment') {
 
   return lines.join('\n\n');
 }
+
+(function registerDotfunBaseExports() {
+  const namespace = (globalThis.dotfunMarkdown = globalThis.dotfunMarkdown || {});
+
+  Object.assign(namespace, {
+    appRoot,
+    editor,
+    preview,
+    stats,
+    themeIndicator,
+    btnDemo,
+    fileInput,
+    btnDownload,
+    btnCopyHtml,
+    btnCopyDocs,
+    btnToggleTheme,
+    btnOpenSettings,
+    btnCloseSettings,
+    settingsPanel,
+    settingsForm,
+    btnResetSettings,
+    hljsThemeLight,
+    hljsThemeDark,
+    settingsPreview,
+    settingsBackdrop,
+    STORAGE_KEYS,
+    sampleDoc,
+    SETTINGS_PREVIEW_SNIPPET,
+    DEFAULT_SETTINGS,
+    buildExportAttribution,
+    computePreviewTokens,
+    getPreviewTokens,
+    setPreviewVar,
+    applyPreviewSettings,
+    savePreviewSettingsSafely,
+    loadPreviewSettings,
+    updateSettingsValueDisplays,
+    syncSettingsPreviewMarkup,
+    markSettingsPreviewDirty,
+    generateExportCss,
+  });
+
+  Object.defineProperties(namespace, {
+    previewSettings: {
+      get: () => previewSettings,
+      set: (value) => {
+        previewSettings = value;
+      },
+      configurable: true,
+    },
+    currentTaskItems: {
+      get: () => currentTaskItems,
+      set: (value) => {
+        currentTaskItems = Array.isArray(value) ? value : [];
+      },
+      configurable: true,
+    },
+    isPreviewSyncing: {
+      get: () => isPreviewSyncing,
+      set: (value) => {
+        isPreviewSyncing = Boolean(value);
+      },
+      configurable: true,
+    },
+  });
+
+  namespace.baseReady = true;
+  if (typeof namespace._notifyReady === 'function') {
+    namespace._notifyReady();
+  }
+})();

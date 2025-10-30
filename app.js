@@ -1041,18 +1041,19 @@ function initializeSettingsUI() {
 function generateExportCss(tokens, target = 'fragment') {
   const fontScale = tokens.fontScale || 1;
   const lines = [];
-  if (target === 'document') {
+  const isDocTarget = target === 'document';
+  if (isDocTarget) {
     lines.push(
-      `body { margin: 0; padding: 0; font-family: ${tokens.fontSans}; background: ${tokens.background}; color: ${tokens.text}; line-height: ${tokens.lineHeight}; }`
+      `body { margin: 0; padding: 0; font-family: ${tokens.fontSans}; color: ${tokens.text}; line-height: ${tokens.lineHeight}; }`
     );
   }
 
+  const surfaceBackgroundLine = isDocTarget ? '' : `  background: ${tokens.background};\n`;
   lines.push(
     `.dotfun-markdown {
   font-family: ${tokens.fontSans};
   color: ${tokens.text};
-  background: ${tokens.background};
-  line-height: ${tokens.lineHeight};
+${surfaceBackgroundLine}  line-height: ${tokens.lineHeight};
   letter-spacing: 0.01em;
   max-width: ${tokens.contentWidth};
   margin: 0 auto;

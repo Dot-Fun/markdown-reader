@@ -90,7 +90,12 @@ Manual checklist when editing core behaviour:
 
 ---
 
+## Minification Workflow
+
+- `index.html` now sources the minified bundle (`app.min.js`). The original `app.js` remains the readable source for development and testing.
+- Regenerate the bundle with `bun build app.js --minify --outfile app.min.js`. Bun ships with this repo’s toolchain; install it via `curl https://bun.sh/install` if it is not already available.
+- Keep `app.js` as the single source of truth. After edits, rebuild the minified output and commit both files so the static site keeps working without a build step.
+
 ## Notes for Future Automation
 
-- If you need bundling/minification again, add a lightweight npm script (e.g., `esbuild` or `terser`) but keep committed output in `app.js` / `styles.css` for readability.
 - Consider adding unit tests around helpers (e.g., task parsing, footnotes) with a minimal Jest setup if complexity grows.

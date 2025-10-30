@@ -20,11 +20,11 @@ No build tooling is required; open `index.html` in a browser to run the experien
 | Task list sync | `extractTaskItems`, `toggleTaskItem`, `preview` `change` listener | Clicking a checkbox in the preview rewrites the editor markdown so source and preview stay aligned. |
 | Footnotes | `preprocessFootnotes`, `renderFootnoteSection` | Renders references and keeps the ↩︎ link inline with content. |
 | Copy actions | `btnCopyHtml` + `btnCopyDocs` handlers | Copy HTML appends an attribution footer. Copy for Docs clones the preview, injects inline styles + attribution, writes HTML and plaintext to the clipboard. |
-| Bookmark toast | Styles in `styles.css` (`.bookmark-callout`)* + `bookmarkPage` helper in `app.js` | Toast reveals after 60s, includes “Click here…” action wired to attempt bookmarking and then hides the toast. |
+| Bookmark toast | Styles in `styles.css` (`.bookmark-callout`)* + toast timers in `app.js` | Toast reveals after 60s, explains keyboard shortcuts, and respects dismiss state via localStorage. |
 | Preview settings modal | `.settings__sheet`, `.settings__content`, `settingsPreview` helpers | Modal now mirrors live preview tokens and has its own scroll container; close button is positioned outside scroll area. |
 | Dotfun feature list | `index.html` (`.app__features`) | SEO-oriented content block after the footer. |
 
-> \*The toast itself is injected and controlled by `app.js` (search for `"bookmarkCallout"` or `"bookmarkPage"` in the script).
+> \*The toast itself is injected and controlled by `app.js` (search for `"bookmarkCallout"` in the script).
 
 ---
 

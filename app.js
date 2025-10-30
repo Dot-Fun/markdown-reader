@@ -1545,6 +1545,7 @@ function hydrateEditor() {
 function setTheme(nextTheme) {
   const theme = nextTheme === 'dark' ? 'dark' : 'light';
   appRoot.dataset.theme = theme;
+  document.body.dataset.theme = theme;
   themeIndicator.textContent = theme === 'dark' ? 'Dark' : 'Light';
   try {
     localStorage.setItem(STORAGE_KEYS.THEME, theme);
@@ -1807,7 +1808,6 @@ document.head.appendChild(style);
 // Bookmark toast notification
 const bookmarkCallout = document.getElementById('bookmark-callout');
 const dismissBookmark = document.getElementById('dismiss-bookmark');
-const bookmarkTrigger = document.getElementById('bookmark-trigger');
 
 // Timer in milliseconds (60000 = 1 minute)
 const BOOKMARK_TOAST_DELAY = 0;
@@ -1847,26 +1847,6 @@ function hideBookmarkToast() {
 
 if (dismissBookmark) {
   dismissBookmark.addEventListener('click', hideBookmarkToast);
-}
-
-function bookmarkPage() {
-  const url = window.location.href;
-  const title = document.title;
-
-  if (window.sidebar && typeof window.sidebar.addPanel === 'function') {
-    window.sidebar.addPanel(title, url, '');
-  } else if (window.external && typeof window.external.AddFavorite === 'function') {
-    window.external.AddFavorite(url, title);
-  } else {
-    alert('To bookmark this page, please press Ctrl+D (Windows/Linux) or Cmd+D (Mac).');
-  }
-}
-
-if (bookmarkTrigger) {
-  bookmarkTrigger.addEventListener('click', () => {
-    bookmarkPage();
-    hideBookmarkToast();
-  });
 }
 
 // Initialize bookmark toast

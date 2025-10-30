@@ -33,8 +33,15 @@ No build tooling is required; open `index.html` in a browser to run the experien
 - The entire theme is tokenised via CSS custom properties (`styles.css` top section). Update palette values there for global changes. Preview variables are also written onto `.settings` to keep the sandbox snippet in sync.
 - Only add new hard-coded colours if they represent new brand tokens—otherwise derive using the existing vars.
 - Components use BEM-like naming (`bookmark-callout__text`). Keep new rules consistent.
-- Dark-mode overrides should be scoped under `.app[data-theme='dark']`. Midnight code theme now uses `--preview-code-block-text` for legibility in the settings sandbox and exports.
-- Bookmark callout accent colours derive from existing tokens; the dark theme uses `--muted` for body copy so prefer the shared token when adjusting.
+- Dark-mode overrides should target `:is(.app[data-theme='dark'], body[data-theme='dark'])` so components rendered outside the root container pick up the palette. Midnight code theme now uses `--preview-code-block-text` for legibility in the settings sandbox and exports.
+- Bookmark callout accent colours derive from existing tokens; the dark theme now reads `--text` from the shared token, so prefer overriding the variable instead of hard-coding colour values.
+
+### Implementation Notes (Oct 2025)
+
+- `setTheme` in `app.js` mirrors the active theme onto both `.app` and `body` via `dataset.theme`. This ensures sibling UI (e.g., the bookmark callout appended after the app container) inherits the correct dark-mode token set. When adding new theme-aware elements outside `.app`, rely on the shared CSS variables instead of duplicating colour declarations.
+- The bookmark toast (`.bookmark-callout`) uses `--text`/`--accent` tokens for all states. Dark-mode overrides simply adjust the underlying custom property, keeping light/dark parity without duplicating component rules.
+- Settings dropdowns (`.settings__field select`) keep the iOS-style double-linear-gradient caret. The background position is centered vertically, and the dark-theme override swaps in a warm neutral surface (`rgba(41, 29, 18, 0.92)`) with subtle border contrast. When adjusting form controls, tweak the token-driven background first, then the gradients for the caret if alignment shifts.
+- Range sliders and other inputs reuse the same accent variables; favour adjusting the tokens near the top of `styles.css` to propagate changes across the modal rather than editing individual component colours.
 
 ---
 

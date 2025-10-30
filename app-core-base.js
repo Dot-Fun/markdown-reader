@@ -1041,9 +1041,10 @@ function initializeSettingsUI() {
 function generateExportCss(tokens, target = 'fragment') {
   const fontScale = tokens.fontScale || 1;
   const lines = [];
+  const baseBackground = target === 'document' ? 'transparent' : tokens.background;
   if (target === 'document') {
     lines.push(
-      `body { margin: 0; padding: 0; font-family: ${tokens.fontSans}; background: ${tokens.background}; color: ${tokens.text}; line-height: ${tokens.lineHeight}; }`
+      `body { margin: 0; padding: 0; font-family: ${tokens.fontSans}; background: ${baseBackground}; color: ${tokens.text}; line-height: ${tokens.lineHeight}; }`
     );
   }
 
@@ -1051,7 +1052,7 @@ function generateExportCss(tokens, target = 'fragment') {
     `.dotfun-markdown {
   font-family: ${tokens.fontSans};
   color: ${tokens.text};
-  background: ${tokens.background};
+  background: ${baseBackground};
   line-height: ${tokens.lineHeight};
   letter-spacing: 0.01em;
   max-width: ${tokens.contentWidth};
@@ -1312,4 +1313,3 @@ function generateExportCss(tokens, target = 'fragment') {
 
   return lines.join('\n\n');
 }
-

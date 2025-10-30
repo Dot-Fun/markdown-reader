@@ -77,6 +77,17 @@ Manual checklist when editing core behaviour:
 5. Trigger Copy HTML / Copy for Docs – paste into an HTML-aware editor and Google Docs to verify attribution + formatting.
 6. Resize viewport under 960px to confirm responsive layout.
 
+### Automated Regressions
+
+- Prerequisite: Node.js 18+ (the repo root already pins this via `engines.node`).
+- Run `node --test tests/ui-integrity.test.cjs` from the project root to execute the DOM/CSS guardrails.
+- Coverage highlights:
+  - Confirms dark-mode tokens are applied to both `.app` and `body`, and that the shared `--text` token remains the warm ivory needed by the bookmark toast.
+  - Verifies the bookmark callout action + text overrides continue using the shared token pipeline in dark mode.
+  - Locks the settings dropdown caret alignment and dark-surface background colour so future tweaks don’t drift.
+  - Ensures the header brand glyph stays a perfect 42px circle with the nested accent dot.
+  - Checks `setTheme` in `app.js` keeps mirroring theme state to `document.body.dataset.theme`.
+
 ---
 
 ## Notes for Future Automation

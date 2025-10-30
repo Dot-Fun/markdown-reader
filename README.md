@@ -20,19 +20,21 @@ No build tooling is required; open `index.html` in a browser to run the experien
 | Task list sync | `extractTaskItems`, `toggleTaskItem`, `preview` `change` listener | Clicking a checkbox in the preview rewrites the editor markdown so source and preview stay aligned. |
 | Footnotes | `preprocessFootnotes`, `renderFootnoteSection` | Renders references and keeps the ↩︎ link inline with content. |
 | Copy actions | `btnCopyHtml` + `btnCopyDocs` handlers | Copy HTML appends an attribution footer. Copy for Docs clones the preview, injects inline styles + attribution, writes HTML and plaintext to the clipboard. |
-| Bookmark toast | Styles in `styles.css` (`.bookmark-callout`)* | Dark mode text override lives near the toast rules. |
+| Bookmark toast | Styles in `styles.css` (`.bookmark-callout`)* + `bookmarkPage` helper in `app.js` | Toast reveals after 60s, includes “Click here…” action wired to attempt bookmarking and then hides the toast. |
+| Preview settings modal | `.settings__sheet`, `.settings__content`, `settingsPreview` helpers | Modal now mirrors live preview tokens and has its own scroll container; close button is positioned outside scroll area. |
 | Dotfun feature list | `index.html` (`.app__features`) | SEO-oriented content block after the footer. |
 
-> \*The toast itself is injected by `app.js` (search for `"Drop markdown file to import"` and `bookmark-callout` in the script).
+> \*The toast itself is injected and controlled by `app.js` (search for `"bookmarkCallout"` or `"bookmarkPage"` in the script).
 
 ---
 
 ## Styling Guidance
 
-- The entire theme is tokenised via CSS custom properties (`styles.css` top section). Update palette values there for global changes.
+- The entire theme is tokenised via CSS custom properties (`styles.css` top section). Update palette values there for global changes. Preview variables are also written onto `.settings` to keep the sandbox snippet in sync.
 - Only add new hard-coded colours if they represent new brand tokens—otherwise derive using the existing vars.
 - Components use BEM-like naming (`bookmark-callout__text`). Keep new rules consistent.
-- Dark-mode overrides should be scoped under `.app[data-theme='dark']`.
+- Dark-mode overrides should be scoped under `.app[data-theme='dark']`. Midnight code theme now uses `--preview-code-block-text` for legibility in the settings sandbox and exports.
+- Bookmark callout accent colours derive from existing tokens; the dark theme uses `--muted` for body copy so prefer the shared token when adjusting.
 
 ---
 

@@ -205,24 +205,34 @@ body.is-settings-open {
 
 .bookmark-callout__action {
   display: inline-flex;
-  margin-left: 4px;
-  padding: 2px 6px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-left: 6px;
+  padding: 10px 20px;
   border-radius: 999px;
-  border: 1px solid transparent;
-  background: rgba(255, 74, 47, 0.12);
-  color: var(--accent);
-  font-size: 0.85rem;
+  border: 0;
+  background-color: var(--accent);
+  color: #fffdf7;
+  font-size: 0.9rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  box-shadow: 0 12px 24px rgba(255, 74, 47, 0.2);
 }
 
 .bookmark-callout__action:hover,
 .bookmark-callout__action:focus-visible {
-  background: var(--accent);
-  color: #fffdf7;
-  border-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px rgba(255, 74, 47, 0.24);
+  background-color: var(--accent-hover);
   outline: none;
+}
+
+.bookmark-callout__action:active {
+  transform: translateY(1px);
+  box-shadow: 0 8px 16px rgba(255, 74, 47, 0.18);
 }
 
 .app[data-theme='dark'] .bookmark-callout__text {
@@ -230,14 +240,20 @@ body.is-settings-open {
 }
 
 .app[data-theme='dark'] .bookmark-callout__action {
-  background: rgba(255, 177, 134, 0.18);
-  color: var(--accent-secondary);
+  background-color: var(--accent);
+  color: #fff2e1;
+  box-shadow: 0 12px 24px rgba(255, 106, 69, 0.28);
 }
 
 .app[data-theme='dark'] .bookmark-callout__action:hover,
 .app[data-theme='dark'] .bookmark-callout__action:focus-visible {
-  background: var(--accent);
-  color: #fff2e1;
+  background-color: var(--accent-hover);
+  color: #fffdf7;
+  box-shadow: 0 16px 32px rgba(255, 106, 69, 0.34);
+}
+
+.app[data-theme='dark'] .bookmark-callout__action:active {
+  box-shadow: 0 8px 18px rgba(255, 106, 69, 0.24);
 }
 
 .bookmark-callout__dismiss {

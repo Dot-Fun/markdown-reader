@@ -92,9 +92,9 @@ Manual checklist when editing core behaviour:
 
 ## Minification Workflow
 
-- `index.html` now sources the minified bundle (`app.min.js`). The original `app.js` remains the readable source for development and testing.
-- Regenerate the bundle with `bun build app.js --minify --outfile app.min.js`. Bun ships with this repo’s toolchain; install it via `curl https://bun.sh/install` if it is not already available.
-- Keep `app.js` as the single source of truth. After edits, rebuild the minified output and commit both files so the static site keeps working without a build step.
+- `index.html` now sources the minified bundles (`app.min.js`, `styles.min.css`). The original `app.js`/`styles.css` stay readable for development and testing.
+- Regenerate the bundles with `bun build app.js --minify --outfile app.min.js` and `bun build styles.css --minify --outfile styles.min.css`. Bun ships with this repo’s toolchain; install it via `curl https://bun.sh/install` if it is not already available.
+- Keep `app.js` and `styles.css` as the single sources of truth. After edits, rebuild the minified outputs and commit both files so the static site keeps working without a build step.
 
 ## Notes for Future Automation
 

@@ -51,19 +51,31 @@
             aria-expanded="false"
           >
             <svg
-              aria-hidden="true"
-              focusable="false"
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-cog-icon lucide-cog"
             >
-              <path
-                d="M10 7.25a2.75 2.75 0 1 0 0 5.5 2.75 2.75 0 0 0 0-5.5Zm0-3.75c.46 0 .86.3.98.73l.24.92a5.15 5.15 0 0 1 1.53.9l.9-.24a1 1 0 0 1 1.18.57l.87 2.02a1 1 0 0 1-.37 1.2l-.76.53a5.18 5.18 0 0 1 .03 1.8l.73.5a1 1 0 0 1 .37 1.2l-.87 2.02a1 1 0 0 1-1.18.57l-.9-.24a5.17 5.17 0 0 1-1.53.9l-.24.92A1 1 0 0 1 10 17.5H8a1 1 0 0 1-.98-.77l-.24-.92a5.17 5.17 0 0 1-1.53-.9l-.9.24a1 1 0 0 1-1.18-.57l-.87-2.02a1 1 0 0 1 .37-1.2l.76-.53a5.19 5.19 0 0 1-.03-1.8l-.73-.5a1 1 0 0 1-.37-1.2l.87-2.02a1 1 0 0 1 1.18-.57l.9.24a5.17 5.17 0 0 1 1.53-.9l.24-.92A1 1 0 0 1 8 3.5h2Z"
-                fill="currentColor"
-                fill-rule="evenodd"
-              />
+              <path d="M11 10.27 7 3.34" />
+              <path d="m11 13.73-4 6.93" />
+              <path d="M12 22v-2" />
+              <path d="M12 2v2" />
+              <path d="M14 12h8" />
+              <path d="m17 20.66-1-1.73" />
+              <path d="m17 3.34-1 1.73" />
+              <path d="M2 12h2" />
+              <path d="m20.66 17-1.73-1" />
+              <path d="m20.66 7-1.73 1" />
+              <path d="m3.34 17 1.73-1" />
+              <path d="m3.34 7 1.73 1" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="12" cy="12" r="8" />
             </svg>
           </button>
           <button
@@ -107,8 +119,14 @@
         <span class="bookmark-callout__icon" aria-hidden="true">⭐</span>
         <p class="bookmark-callout__text">
           <strong>Love dotfun Markdown Studio?</strong>
-          Bookmark this page (Ctrl/Cmd+D) for instant access to your favorite markdown editor
-          anytime.
+          Bookmark this page for instant access to your favorite markdown editor anytime.
+          <button
+            type="button"
+            class="bookmark-callout__action"
+            id="bookmark-trigger"
+          >
+            Click here to bookmark the page
+          </button>
         </p>
         <button
           type="button"
@@ -130,6 +148,14 @@
         aria-labelledby="settings-title"
         aria-describedby="settings-description"
       >
+        <button
+          type="button"
+          class="settings__close"
+          id="btn-close-settings"
+          aria-label="Close settings"
+        >
+          <span aria-hidden="true">✕</span>
+        </button>
         <div class="settings__columns">
           <aside class="settings__sandbox" aria-hidden="true">
             <div class="settings__sandbox-frame">
@@ -146,183 +172,186 @@
               <div>
                 <h2 id="settings-title">Preview Settings</h2>
                 <p id="settings-description">
-                  Tune the reader experience and exports. Changes apply instantly and save to this device.
+                  Tune the reader experience and exports. Changes apply instantly and save to this
+                  device.
                 </p>
               </div>
-              <button
-                type="button"
-                class="settings__close"
-                id="btn-close-settings"
-                aria-label="Close settings"
-              >
-                <span aria-hidden="true">✕</span>
-              </button>
             </header>
             <form class="settings__form" id="settings-form">
-          <section class="settings__section" aria-labelledby="settings-typography">
-            <h3 id="settings-typography">Typography</h3>
-            <div class="settings__grid">
-              <label class="settings__field" for="setting-font-family">
-                <span class="settings__label">Body font</span>
-                <select data-setting="fontFamily" id="setting-font-family">
-                  <option value="sora">Dotfun Sans (Sora)</option>
-                  <option value="inter">Inter</option>
-                  <option value="system">System UI</option>
-                  <option value="lora">Editorial Serif (Lora)</option>
-                </select>
-                <span class="settings__hint" data-display-for="fontFamily"></span>
-              </label>
-              <label class="settings__field" for="setting-heading-font">
-                <span class="settings__label">Heading font</span>
-                <select data-setting="headingFont" id="setting-heading-font">
-                  <option value="sora">Sora Display</option>
-                  <option value="match">Match body</option>
-                  <option value="lora">Editorial Serif</option>
-                </select>
-                <span class="settings__hint" data-display-for="headingFont"></span>
-              </label>
-              <label class="settings__field settings__field--range" for="setting-text-scale">
-                <span class="settings__label">Text size</span>
-                <div class="settings__control">
-                  <input
-                    type="range"
-                    min="0.9"
-                    max="1.2"
-                    step="0.05"
-                    data-setting="textScale"
-                    id="setting-text-scale"
-                  />
-                  <span class="settings__value" data-display-for="textScale">100%</span>
+              <section class="settings__section" aria-labelledby="settings-typography">
+                <h3 id="settings-typography">Typography</h3>
+                <div class="settings__grid">
+                  <label class="settings__field" for="setting-font-family">
+                    <span class="settings__label">Body font</span>
+                    <select data-setting="fontFamily" id="setting-font-family">
+                      <option value="sora">Dotfun Sans (Sora)</option>
+                      <option value="inter">Inter</option>
+                      <option value="system">System UI</option>
+                      <option value="lora">Editorial Serif (Lora)</option>
+                    </select>
+                    <span class="settings__hint" data-display-for="fontFamily"></span>
+                  </label>
+                  <label class="settings__field" for="setting-heading-font">
+                    <span class="settings__label">Heading font</span>
+                    <select data-setting="headingFont" id="setting-heading-font">
+                      <option value="sora">Sora Display</option>
+                      <option value="match">Match body</option>
+                      <option value="lora">Editorial Serif</option>
+                    </select>
+                    <span class="settings__hint" data-display-for="headingFont"></span>
+                  </label>
+                  <label class="settings__field settings__field--range" for="setting-text-scale">
+                    <span class="settings__label">Text size</span>
+                    <div class="settings__control">
+                      <input
+                        type="range"
+                        min="0.9"
+                        max="1.2"
+                        step="0.05"
+                        data-setting="textScale"
+                        id="setting-text-scale"
+                      />
+                      <span class="settings__value" data-display-for="textScale">100%</span>
+                    </div>
+                  </label>
+                  <label class="settings__field settings__field--range" for="setting-line-height">
+                    <span class="settings__label">Line height</span>
+                    <div class="settings__control">
+                      <input
+                        type="range"
+                        min="1.4"
+                        max="2"
+                        step="0.05"
+                        data-setting="lineHeight"
+                        id="setting-line-height"
+                      />
+                      <span class="settings__value" data-display-for="lineHeight">1.75</span>
+                    </div>
+                  </label>
+                  <label class="settings__field" for="setting-heading-weight">
+                    <span class="settings__label">Heading weight</span>
+                    <select data-setting="headingWeight" id="setting-heading-weight">
+                      <option value="500">Medium</option>
+                      <option value="600">Semibold</option>
+                      <option value="700">Bold</option>
+                    </select>
+                    <span class="settings__hint">Affects all heading levels</span>
+                  </label>
                 </div>
-              </label>
-              <label class="settings__field settings__field--range" for="setting-line-height">
-                <span class="settings__label">Line height</span>
-                <div class="settings__control">
-                  <input
-                    type="range"
-                    min="1.4"
-                    max="2"
-                    step="0.05"
-                    data-setting="lineHeight"
-                    id="setting-line-height"
-                  />
-                  <span class="settings__value" data-display-for="lineHeight">1.75</span>
-                </div>
-              </label>
-              <label class="settings__field" for="setting-heading-weight">
-                <span class="settings__label">Heading weight</span>
-                <select data-setting="headingWeight" id="setting-heading-weight">
-                  <option value="500">Medium</option>
-                  <option value="600">Semibold</option>
-                  <option value="700">Bold</option>
-                </select>
-                <span class="settings__hint">Affects all heading levels</span>
-              </label>
-            </div>
-          </section>
+              </section>
 
-          <section class="settings__section" aria-labelledby="settings-layout">
-            <h3 id="settings-layout">Layout</h3>
-            <div class="settings__grid">
-              <label class="settings__field settings__field--range" for="setting-content-width">
-                <span class="settings__label">Content width</span>
-                <div class="settings__control">
-                  <input
-                    type="range"
-                    min="60"
-                    max="90"
-                    step="1"
-                    data-setting="contentWidth"
-                    id="setting-content-width"
-                  />
-                  <span class="settings__value" data-display-for="contentWidth">70&nbsp;ch</span>
+              <section class="settings__section" aria-labelledby="settings-layout">
+                <h3 id="settings-layout">Layout</h3>
+                <div class="settings__grid">
+                  <label class="settings__field settings__field--range" for="setting-content-width">
+                    <span class="settings__label">Content width</span>
+                    <div class="settings__control">
+                      <input
+                        type="range"
+                        min="60"
+                        max="90"
+                        step="1"
+                        data-setting="contentWidth"
+                        id="setting-content-width"
+                      />
+                      <span class="settings__value" data-display-for="contentWidth"
+                        >70&nbsp;ch</span
+                      >
+                    </div>
+                  </label>
+                  <label
+                    class="settings__field settings__field--range"
+                    for="setting-paragraph-spacing"
+                  >
+                    <span class="settings__label">Paragraph spacing</span>
+                    <div class="settings__control">
+                      <input
+                        type="range"
+                        min="0.8"
+                        max="1.6"
+                        step="0.05"
+                        data-setting="paragraphSpacing"
+                        id="setting-paragraph-spacing"
+                      />
+                      <span class="settings__value" data-display-for="paragraphSpacing"
+                        >1.1&nbsp;rem</span
+                      >
+                    </div>
+                  </label>
                 </div>
-              </label>
-              <label class="settings__field settings__field--range" for="setting-paragraph-spacing">
-                <span class="settings__label">Paragraph spacing</span>
-                <div class="settings__control">
-                  <input
-                    type="range"
-                    min="0.8"
-                    max="1.6"
-                    step="0.05"
-                    data-setting="paragraphSpacing"
-                    id="setting-paragraph-spacing"
-                  />
-                  <span class="settings__value" data-display-for="paragraphSpacing">1.1&nbsp;rem</span>
-                </div>
-              </label>
-            </div>
-          </section>
+              </section>
 
-          <section class="settings__section" aria-labelledby="settings-color">
-            <h3 id="settings-color">Color &amp; accents</h3>
-            <div class="settings__grid settings__grid--auto">
-              <label class="settings__field settings__field--color" for="setting-accent-color">
-                <span class="settings__label">Accent color</span>
-                <div class="settings__color-control">
-                  <input type="color" data-setting="accentColor" id="setting-accent-color" />
-                  <button
-                    type="button"
-                    class="settings__pill"
-                    data-settings-reset="accentColor"
+              <section class="settings__section" aria-labelledby="settings-color">
+                <h3 id="settings-color">Color &amp; accents</h3>
+                <div class="settings__grid settings__grid--auto">
+                  <label class="settings__field settings__field--color" for="setting-accent-color">
+                    <span class="settings__label">Accent color</span>
+                    <div class="settings__color-control">
+                      <input type="color" data-setting="accentColor" id="setting-accent-color" />
+                      <button
+                        type="button"
+                        class="settings__pill"
+                        data-settings-reset="accentColor"
+                      >
+                        Default
+                      </button>
+                    </div>
+                    <span class="settings__hint">Links, callouts, checkboxes, attribution</span>
+                  </label>
+                  <label
+                    class="settings__field settings__field--color"
+                    for="setting-background-color"
                   >
-                    Default
-                  </button>
+                    <span class="settings__label">Preview background</span>
+                    <div class="settings__color-control">
+                      <input
+                        type="color"
+                        data-setting="backgroundColor"
+                        id="setting-background-color"
+                      />
+                      <button
+                        type="button"
+                        class="settings__pill"
+                        data-settings-reset="backgroundColor"
+                      >
+                        Default
+                      </button>
+                    </div>
+                    <span class="settings__hint">Applies to the live preview and exports</span>
+                  </label>
+                  <label class="settings__field settings__field--color" for="setting-text-color">
+                    <span class="settings__label">Text color</span>
+                    <div class="settings__color-control">
+                      <input type="color" data-setting="textColor" id="setting-text-color" />
+                      <button type="button" class="settings__pill" data-settings-reset="textColor">
+                        Default
+                      </button>
+                    </div>
+                    <span class="settings__hint">Body copy, headings, table text</span>
+                  </label>
+                  <label class="settings__field" for="setting-code-theme">
+                    <span class="settings__label">Code block theme</span>
+                    <select data-setting="codeTheme" id="setting-code-theme">
+                      <option value="system">Match theme</option>
+                      <option value="pastel">Soft Pastel</option>
+                      <option value="midnight">Midnight Contrast</option>
+                      <option value="mint">Mint Clay</option>
+                    </select>
+                    <span class="settings__hint">Controls code panels, tables, highlights</span>
+                  </label>
                 </div>
-                <span class="settings__hint">Links, callouts, checkboxes, attribution</span>
-              </label>
-              <label class="settings__field settings__field--color" for="setting-background-color">
-                <span class="settings__label">Preview background</span>
-                <div class="settings__color-control">
-                  <input type="color" data-setting="backgroundColor" id="setting-background-color" />
-                  <button
-                    type="button"
-                    class="settings__pill"
-                    data-settings-reset="backgroundColor"
-                  >
-                    Default
-                  </button>
-                </div>
-                <span class="settings__hint">Applies to the live preview and exports</span>
-              </label>
-              <label class="settings__field settings__field--color" for="setting-text-color">
-                <span class="settings__label">Text color</span>
-                <div class="settings__color-control">
-                  <input type="color" data-setting="textColor" id="setting-text-color" />
-                  <button
-                    type="button"
-                    class="settings__pill"
-                    data-settings-reset="textColor"
-                  >
-                    Default
-                  </button>
-                </div>
-                <span class="settings__hint">Body copy, headings, table text</span>
-              </label>
-              <label class="settings__field" for="setting-code-theme">
-                <span class="settings__label">Code block theme</span>
-                <select data-setting="codeTheme" id="setting-code-theme">
-                  <option value="system">Match theme</option>
-                  <option value="pastel">Soft Pastel</option>
-                  <option value="midnight">Midnight Contrast</option>
-                  <option value="mint">Mint Clay</option>
-                </select>
-                <span class="settings__hint">Controls code panels, tables, highlights</span>
-              </label>
-            </div>
-          </section>
+              </section>
 
-          <footer class="settings__footer">
-            <button
-              type="button"
-              class="settings__pill settings__pill--danger"
-              id="btn-reset-settings"
-            >
-              Restore defaults
-            </button>
-            <p class="settings__note">Settings auto-save for this browser.</p>
-          </footer>
+              <footer class="settings__footer">
+                <button
+                  type="button"
+                  class="settings__pill settings__pill--danger"
+                  id="btn-reset-settings"
+                >
+                  Restore defaults
+                </button>
+                <p class="settings__note">Settings auto-save for this browser.</p>
+              </footer>
             </form>
           </div>
         </div>

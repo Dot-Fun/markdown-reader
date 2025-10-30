@@ -50,6 +50,7 @@
   --preview-code-block-border: var(--code-block-border);
   --preview-code-badge-bg: var(--code-badge-bg);
   --preview-code-badge-text: var(--code-badge-text);
+  --preview-code-block-text: var(--text);
   --preview-table-border: var(--table-border);
   --preview-table-header-bg: var(--table-header-bg);
   --preview-table-row-even: var(--table-row-even);
@@ -89,6 +90,7 @@
   --code-block-border: rgba(148, 163, 184, 0.35);
   --code-badge-bg: rgba(33, 22, 13, 0.76);
   --code-badge-text: #fff2e1;
+  --preview-code-block-text: #fff2e1;
   --table-border: rgba(255, 200, 164, 0.24);
   --table-header-bg: rgba(255, 106, 69, 0.18);
   --table-row-even: rgba(255, 200, 164, 0.12);
@@ -201,8 +203,41 @@ body.is-settings-open {
   color: var(--accent);
 }
 
-.app[data-theme='dark'] .bookmark-callout__text {
+.bookmark-callout__action {
+  display: inline-flex;
+  margin-left: 4px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: rgba(255, 74, 47, 0.12);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.bookmark-callout__action:hover,
+.bookmark-callout__action:focus-visible {
+  background: var(--accent);
   color: #fffdf7;
+  border-color: transparent;
+  outline: none;
+}
+
+.app[data-theme='dark'] .bookmark-callout__text {
+  color: var(--muted);
+}
+
+.app[data-theme='dark'] .bookmark-callout__action {
+  background: rgba(255, 177, 134, 0.18);
+  color: var(--accent-secondary);
+}
+
+.app[data-theme='dark'] .bookmark-callout__action:hover,
+.app[data-theme='dark'] .bookmark-callout__action:focus-visible {
+  background: var(--accent);
+  color: #fff2e1;
 }
 
 .bookmark-callout__dismiss {
@@ -233,7 +268,8 @@ body.is-settings-open {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -464,6 +500,7 @@ body.is-settings-open {
   overflow-y: auto;
   color: var(--preview-text, var(--text));
   font-family: var(--preview-font-sans, var(--font-sans));
+  line-height: var(--preview-line-height, 1.75);
   background: transparent;
 }
 
@@ -530,7 +567,8 @@ body.is-settings-open {
 
 .markdown-body ul,
 .markdown-body ol {
-  margin: calc(1.2rem * var(--preview-font-scale, 1)) 0 calc(1.2rem * var(--preview-font-scale, 1)) 1.6rem;
+  margin: calc(1.2rem * var(--preview-font-scale, 1)) 0 calc(1.2rem * var(--preview-font-scale, 1))
+    1.6rem;
   padding-left: 1.2rem;
   font-size: calc(1.05rem * var(--preview-font-scale, 1));
 }
@@ -676,7 +714,7 @@ body.is-settings-open {
 }
 
 .markdown-body pre code.hljs {
-  color: var(--preview-text, var(--text));
+  color: var(--preview-code-block-text, var(--preview-text, var(--text)));
 }
 
 .markdown-body .hljs-comment,
@@ -892,7 +930,7 @@ textarea::-webkit-scrollbar-track,
 .settings__sheet {
   position: relative;
   width: 100%;
-  max-height: min(96vh, 900px);
+  height: 100%;
   background: var(--surface);
   color: var(--text);
   border-radius: 26px;
@@ -928,8 +966,9 @@ textarea::-webkit-scrollbar-track,
   min-width: 0;
   max-height: 100%;
   min-height: 0;
-  height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
 }
 
 .settings__sandbox {
@@ -972,6 +1011,13 @@ textarea::-webkit-scrollbar-track,
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-top: 4px;
+  padding-bottom: 8px;
+  padding-right: 54px;
+  background: var(--surface);
 }
 
 .settings__header h2 {
@@ -984,7 +1030,6 @@ textarea::-webkit-scrollbar-track,
   margin: 6px 0 0;
   font-size: 0.9rem;
   color: var(--muted);
-  max-width: 24ch;
 }
 
 .settings__close {
@@ -1001,6 +1046,10 @@ textarea::-webkit-scrollbar-track,
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease, transform 0.18s ease;
+  position: absolute;
+  top: clamp(24px, 4vw, 36px);
+  right: clamp(24px, 4vw, 36px);
+  z-index: 3;
 }
 
 .settings__close:hover,
@@ -1014,7 +1063,6 @@ textarea::-webkit-scrollbar-track,
   display: flex;
   flex-direction: column;
   gap: 28px;
-  overflow-y: auto;
   padding-right: 6px;
   flex: 1;
   min-height: 0;
@@ -1102,7 +1150,8 @@ textarea::-webkit-scrollbar-track,
 }
 
 .settings__field select {
-  background-image: linear-gradient(45deg, transparent 50%, var(--accent) 51%), linear-gradient(135deg, var(--accent) 49%, transparent 50%);
+  background-image: linear-gradient(45deg, transparent 50%, var(--accent) 51%),
+    linear-gradient(135deg, var(--accent) 49%, transparent 50%);
   background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 13px) calc(50% - 3px);
   background-size: 7px 7px;
   background-repeat: no-repeat;

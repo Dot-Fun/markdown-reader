@@ -166,9 +166,9 @@ const HEADING_FONT_LABELS = {
 };
 
 const HEADING_WEIGHT_LABELS = {
-  '500': 'Medium',
-  '600': 'Semibold',
-  '700': 'Bold',
+  500: 'Medium',
+  600: 'Semibold',
+  700: 'Bold',
 };
 
 const CODE_THEME_PRESETS = {
@@ -180,6 +180,7 @@ const CODE_THEME_PRESETS = {
       codeBlockBorder: context.blockBorder,
       codeBadgeBg: context.badgeBg,
       codeBadgeText: context.badgeText,
+      codeBlockText: context.text,
       hlKeyword: context.hlKeyword,
       hlString: context.hlString,
       hlTitle: context.hlTitle,
@@ -199,6 +200,7 @@ const CODE_THEME_PRESETS = {
       codeBlockBorder: colorWithAlpha(accent, 0.32, context.blockBorder),
       codeBadgeBg: colorWithAlpha(accent, 0.22, context.badgeBg),
       codeBadgeText: text,
+      codeBlockText: text,
       hlKeyword: accent,
       hlString: mixColors(accent, '#2ca659', 0.5) || context.hlString,
       hlTitle: mixColors(accent, '#9b4dff', 0.42) || context.hlTitle,
@@ -211,37 +213,42 @@ const CODE_THEME_PRESETS = {
   },
   midnight(context) {
     const { accent, text, background } = context;
-    const midnightBase = mixColors(background, '#05060d', 0.78) || '#0b1020';
+    const midnightBase = mixColors(background, '#121827', 0.6) || '#1b2335';
+    const midnightBadge = mixColors(accent, '#2d1b24', 0.4) || '#3a2733';
+    const midnightText = mixColors('#f7f5ff', '#e9edf5', 0.5) || '#f1f5f9';
     return {
-      codeInlineBg: colorWithAlpha(accent, 0.26, context.inlineBg),
-      codeInlineColor: mixColors(accent, '#d1d4ff', 0.4) || context.inlineColor,
+      codeInlineBg: colorWithAlpha(accent, 0.22, context.inlineBg),
+      codeInlineColor: mixColors(accent, midnightText, 0.5) || midnightText,
       codeBlockBg: midnightBase,
       codeBlockBorder: colorWithAlpha(
-        mixColors(accent, midnightBase, 0.5) || midnightBase,
-        0.55,
+        mixColors(accent, midnightBase, 0.4) || midnightBase,
+        0.6,
         context.blockBorder
       ),
-      codeBadgeBg: colorWithAlpha(
-        mixColors(accent, '#141b2d', 0.6) || '#241b2d',
-        0.5,
-        context.badgeBg
+      codeBadgeBg: colorWithAlpha(midnightBadge, 0.65, context.badgeBg),
+      codeBadgeText: midnightText,
+      codeBlockText: midnightText,
+      hlKeyword: mixColors(accent, '#ffd166', 0.5) || midnightText,
+      hlString: mixColors('#8efac6', accent, 0.35) || midnightText,
+      hlTitle: mixColors('#c1b4ff', accent, 0.4) || midnightText,
+      hlNumber: mixColors('#f9a46c', accent, 0.4) || midnightText,
+      hlComment:
+        mixColors(midnightText, midnightBase, 0.4) ||
+        mixColors(text, midnightBase, 0.5) ||
+        midnightText,
+      tableBorder: colorWithAlpha(
+        mixColors(midnightText, midnightBase, 0.55) || midnightBase,
+        0.55,
+        context.tableBorder
       ),
-      codeBadgeText: mixColors(text, '#ffffff', 0.85) || context.badgeText,
-      hlKeyword: mixColors(accent, '#ffd166', 0.45) || context.hlKeyword,
-      hlString: mixColors('#34d399', accent, 0.35) || context.hlString,
-      hlTitle: mixColors('#a855f7', accent, 0.4) || context.hlTitle,
-      hlNumber: mixColors('#f97316', accent, 0.45) || context.hlNumber,
-      hlComment: mixColors(text, midnightBase, 0.68) || context.hlComment,
-      tableBorder:
-        colorWithAlpha(mixColors(text, midnightBase, 0.6) || midnightBase, 0.6, context.tableBorder),
       tableHeaderBg: colorWithAlpha(
-        mixColors(accent, midnightBase, 0.35) || midnightBase,
-        0.42,
+        mixColors(accent, midnightBase, 0.3) || midnightBase,
+        0.5,
         context.tableHeaderBg
       ),
       tableRowEven: colorWithAlpha(
-        mixColors(accent, '#111827', 0.4) || '#111827',
-        0.3,
+        mixColors(accent, '#1a1f2d', 0.35) || '#1f2432',
+        0.38,
         context.tableRowEven
       ),
     };
@@ -256,6 +263,7 @@ const CODE_THEME_PRESETS = {
       codeBlockBorder: colorWithAlpha(mintAccent, 0.28, context.blockBorder),
       codeBadgeBg: colorWithAlpha(mintAccent, 0.24, context.badgeBg),
       codeBadgeText: mixColors(text, '#053d2f', 0.6) || context.badgeText,
+      codeBlockText: mixColors(text, '#022d20', 0.5) || context.text,
       hlKeyword: mixColors(mintAccent, '#0ea5e9', 0.32) || context.hlKeyword,
       hlString: mixColors('#22c55e', mintAccent, 0.5) || context.hlString,
       hlTitle: mixColors('#6366f1', mintAccent, 0.35) || context.hlTitle,
@@ -312,14 +320,14 @@ function parseColor(color) {
       const r = parseInt(hex[0] + hex[0], 16);
       const g = parseInt(hex[1] + hex[1], 16);
       const b = parseInt(hex[2] + hex[2], 16);
-      if ([r, g, b].some(component => Number.isNaN(component))) return null;
+      if ([r, g, b].some((component) => Number.isNaN(component))) return null;
       return { r, g, b, a: 1 };
     }
     if (hex.length === 6 || hex.length === 8) {
       const r = parseInt(hex.substring(0, 2), 16);
       const g = parseInt(hex.substring(2, 4), 16);
       const b = parseInt(hex.substring(4, 6), 16);
-      if ([r, g, b].some(component => Number.isNaN(component))) return null;
+      if ([r, g, b].some((component) => Number.isNaN(component))) return null;
       if (hex.length === 8) {
         const a = parseInt(hex.substring(6, 8), 16);
         return { r, g, b, a: Math.round((a / 255) * 1000) / 1000 };
@@ -331,12 +339,12 @@ function parseColor(color) {
 
   const rgbMatch = value.match(/^rgba?\(([^)]+)\)$/i);
   if (rgbMatch) {
-    const parts = rgbMatch[1].split(',').map(part => part.trim());
+    const parts = rgbMatch[1].split(',').map((part) => part.trim());
     if (parts.length < 3) return null;
     const r = Number(parts[0]);
     const g = Number(parts[1]);
     const b = Number(parts[2]);
-    if ([r, g, b].some(component => Number.isNaN(component))) return null;
+    if ([r, g, b].some((component) => Number.isNaN(component))) return null;
     const a = parts.length > 3 ? Number(parts[3]) : 1;
     return {
       r: Math.min(Math.max(Math.round(r), 0), 255),
@@ -384,7 +392,7 @@ function mixColors(colorA, colorB, amount) {
 function colorToHex(color, fallback = '#FF4A2F') {
   const parsed = parseColor(color);
   if (!parsed) return fallback;
-  const toHex = component => component.toString(16).padStart(2, '0');
+  const toHex = (component) => component.toString(16).padStart(2, '0');
   return `#${toHex(parsed.r)}${toHex(parsed.g)}${toHex(parsed.b)}`.toUpperCase();
 }
 
@@ -396,7 +404,11 @@ function resolveHeadingFont(key, bodyFont) {
   if (key === 'match') {
     return bodyFont;
   }
-  return PREVIEW_HEADING_FAMILIES[key] || PREVIEW_HEADING_FAMILIES[DEFAULT_SETTINGS.headingFont] || bodyFont;
+  return (
+    PREVIEW_HEADING_FAMILIES[key] ||
+    PREVIEW_HEADING_FAMILIES[DEFAULT_SETTINGS.headingFont] ||
+    bodyFont
+  );
 }
 
 function sanitizeColorValue(value) {
@@ -413,7 +425,7 @@ function normalizeColorInputValue(color, fallback) {
   if (!parsed) {
     return sanitizeColorValue(fallback) || '#FF4A2F';
   }
-  const toHex = component => component.toString(16).padStart(2, '0');
+  const toHex = (component) => component.toString(16).padStart(2, '0');
   return `#${toHex(parsed.r)}${toHex(parsed.g)}${toHex(parsed.b)}`.toUpperCase();
 }
 
@@ -492,11 +504,7 @@ function computePreviewTokens(settings) {
   const inlineBgBase = getCssVar(computed, '--code-inline-bg', 'rgba(31, 36, 48, 0.1)');
   const inlineColorBase = getCssVar(computed, '--code-inline-color', '#0C7C3F');
   const blockBgBase = getCssVar(computed, '--code-block-bg', '#EEF2FF');
-  const blockBorderBase = getCssVar(
-    computed,
-    '--code-block-border',
-    'rgba(39, 94, 254, 0.16)'
-  );
+  const blockBorderBase = getCssVar(computed, '--code-block-border', 'rgba(39, 94, 254, 0.16)');
   const badgeBgBase = getCssVar(computed, '--code-badge-bg', 'rgba(39, 94, 254, 0.12)');
   const badgeTextBase = getCssVar(computed, '--code-badge-text', textBase);
   const hlKeywordBase = getCssVar(computed, '--hljs-keyword', accentBase);
@@ -581,6 +589,7 @@ function computePreviewTokens(settings) {
   const codeBlockBorder = codeTokens.codeBlockBorder || blockBorderBase;
   const codeBadgeBg = codeTokens.codeBadgeBg || badgeBgBase;
   const codeBadgeText = codeTokens.codeBadgeText || badgeTextBase;
+  const codeBlockText = codeTokens.codeBlockText || text;
   const hlKeyword = codeTokens.hlKeyword || hlKeywordBase;
   const hlString = codeTokens.hlString || hlStringBase;
   const hlTitle = codeTokens.hlTitle || hlTitleBase;
@@ -624,6 +633,7 @@ function computePreviewTokens(settings) {
     codeBlockBorder,
     codeBadgeBg,
     codeBadgeText,
+    codeBlockText,
     hlKeyword,
     hlString,
     hlTitle,
@@ -638,7 +648,7 @@ function setPreviewVar(name, value) {
   if (appRoot) targets.push(appRoot);
   if (settingsPanel) targets.push(settingsPanel);
   if (targets.length === 0) return;
-  targets.forEach(target => {
+  targets.forEach((target) => {
     if (!target) return;
     if (value === undefined || value === null || value === '') {
       target.style.removeProperty(name);
@@ -672,6 +682,7 @@ function applyPreviewSettings(settings = previewSettings) {
   setPreviewVar('--preview-code-block-border', tokens.codeBlockBorder);
   setPreviewVar('--preview-code-badge-bg', tokens.codeBadgeBg);
   setPreviewVar('--preview-code-badge-text', tokens.codeBadgeText);
+  setPreviewVar('--preview-code-block-text', tokens.codeBlockText);
   setPreviewVar('--preview-table-border', tokens.tableBorder);
   setPreviewVar('--preview-table-header-bg', tokens.tableHeaderBg);
   setPreviewVar('--preview-table-row-even', tokens.tableRowEven);
@@ -705,7 +716,9 @@ function loadPreviewSettings() {
   }
 
   const merged =
-    stored && typeof stored === 'object' ? { ...DEFAULT_SETTINGS, ...stored } : { ...DEFAULT_SETTINGS };
+    stored && typeof stored === 'object'
+      ? { ...DEFAULT_SETTINGS, ...stored }
+      : { ...DEFAULT_SETTINGS };
 
   if (!VALID_FONT_KEYS.has(merged.fontFamily)) {
     merged.fontFamily = DEFAULT_SETTINGS.fontFamily;
@@ -723,10 +736,15 @@ function loadPreviewSettings() {
   }
 
   merged.textScale = clampNumber(merged.textScale, 0.9, 1.2, DEFAULT_SETTINGS.textScale);
-  merged.lineHeight = Math.round(clampNumber(merged.lineHeight, 1.4, 2, DEFAULT_SETTINGS.lineHeight) * 100) / 100;
-  merged.contentWidth = Math.round(clampNumber(merged.contentWidth, 60, 90, DEFAULT_SETTINGS.contentWidth));
+  merged.lineHeight =
+    Math.round(clampNumber(merged.lineHeight, 1.4, 2, DEFAULT_SETTINGS.lineHeight) * 100) / 100;
+  merged.contentWidth = Math.round(
+    clampNumber(merged.contentWidth, 60, 90, DEFAULT_SETTINGS.contentWidth)
+  );
   merged.paragraphSpacing =
-    Math.round(clampNumber(merged.paragraphSpacing, 0.8, 1.6, DEFAULT_SETTINGS.paragraphSpacing) * 100) / 100;
+    Math.round(
+      clampNumber(merged.paragraphSpacing, 0.8, 1.6, DEFAULT_SETTINGS.paragraphSpacing) * 100
+    ) / 100;
 
   merged.accentColor = sanitizeColorValue(merged.accentColor);
   merged.backgroundColor = sanitizeColorValue(merged.backgroundColor);
@@ -738,7 +756,7 @@ function loadPreviewSettings() {
 function updateSettingsValueDisplays() {
   if (!settingsForm) return;
   const nodes = settingsForm.querySelectorAll('[data-display-for]');
-  nodes.forEach(node => {
+  nodes.forEach((node) => {
     const key = node.getAttribute('data-display-for');
     if (!key) return;
     const text = formatSettingDisplay(key);
@@ -756,7 +774,7 @@ function syncSettingsPreviewMarkup(force = false) {
   settingsPreview.innerHTML = SETTINGS_PREVIEW_SNIPPET.trim();
   settingsPreview.scrollTop = 0;
   const codeBlocks = settingsPreview.querySelectorAll('pre code');
-  codeBlocks.forEach(block => {
+  codeBlocks.forEach((block) => {
     hljs.highlightElement(block);
     decorateCodeBlock(block);
   });
@@ -781,7 +799,7 @@ function populateSettingsForm() {
   if (!settingsForm) return;
   const tokens = getPreviewTokens() || computePreviewTokens(previewSettings);
   const controls = settingsForm.querySelectorAll('[data-setting]');
-  controls.forEach(control => {
+  controls.forEach((control) => {
     const key = control.getAttribute('data-setting');
     if (!key || !(key in previewSettings)) return;
     const value = previewSettings[key];
@@ -835,7 +853,8 @@ function updateSettingValue(key, rawValue) {
       return true;
     }
     case 'lineHeight': {
-      const next = Math.round(clampNumber(rawValue, 1.4, 2, previewSettings.lineHeight) * 100) / 100;
+      const next =
+        Math.round(clampNumber(rawValue, 1.4, 2, previewSettings.lineHeight) * 100) / 100;
       if (previewSettings.lineHeight === next) return false;
       previewSettings.lineHeight = next;
       return true;
@@ -921,7 +940,7 @@ function handleSettingsKeydown(event) {
   if (event.key !== 'Tab') return;
   const focusable = settingsPanel.querySelectorAll(SETTINGS_FOCUSABLE_SELECTOR);
   if (!focusable.length) return;
-  const focusables = Array.from(focusable).filter(element => !element.hasAttribute('disabled'));
+  const focusables = Array.from(focusable).filter((element) => !element.hasAttribute('disabled'));
   if (!focusables.length) return;
   const first = focusables[0];
   const last = focusables[focusables.length - 1];
@@ -960,8 +979,8 @@ function openSettingsPanel() {
     firstControl instanceof HTMLElement
       ? firstControl
       : btnCloseSettings instanceof HTMLElement
-        ? btnCloseSettings
-        : null;
+      ? btnCloseSettings
+      : null;
   if (focusTarget) {
     setTimeout(() => focusTarget.focus(), 30);
   }
@@ -1001,7 +1020,7 @@ function initializeSettingsUI() {
     settingsForm.addEventListener('input', handleSettingsInput);
     settingsForm.addEventListener('change', handleSettingsInput);
     const resetButtons = settingsForm.querySelectorAll('[data-settings-reset]');
-    resetButtons.forEach(button => {
+    resetButtons.forEach((button) => {
       button.addEventListener('click', () => {
         const key = button.getAttribute('data-settings-reset');
         if (!key) return;
@@ -1161,7 +1180,7 @@ function generateExportCss(tokens, target = 'fragment') {
   font-family: ${tokens.headingFont};
 }
 .dotfun-markdown pre code.hljs {
-  color: ${tokens.text};
+  color: ${tokens.codeBlockText};
 }
 .dotfun-markdown .hljs-comment,
 .dotfun-markdown .hljs-quote {
@@ -1431,7 +1450,7 @@ function renderFootnoteSection(footnotes) {
   if (!footnotes.length) return '';
 
   const items = footnotes
-    .map(note => {
+    .map((note) => {
       const container = document.createElement('div');
       container.innerHTML = marked.parse(note.content).trim();
       const paragraphs = container.querySelectorAll('p');
@@ -1440,10 +1459,7 @@ function renderFootnoteSection(footnotes) {
         const lastParagraph = paragraphs[paragraphs.length - 1];
         lastParagraph.insertAdjacentHTML('beforeend', anchorHtml);
       } else {
-        container.insertAdjacentHTML(
-          'beforeend',
-          `<p>${anchorHtml.trim()}</p>`
-        );
+        container.insertAdjacentHTML('beforeend', `<p>${anchorHtml.trim()}</p>`);
       }
       return `<li id="fn-${note.id}"><div class="footnote-content">${container.innerHTML}</div></li>`;
     })
@@ -1486,7 +1502,7 @@ function updatePreview(markdown) {
   const sanitized = DOMPurify.sanitize(mainHtml + footnoteHtml);
   preview.innerHTML = sanitized;
   updateTaskCheckboxStates();
-  preview.querySelectorAll('pre code').forEach(block => {
+  preview.querySelectorAll('pre code').forEach((block) => {
     hljs.highlightElement(block);
     decorateCodeBlock(block);
   });
@@ -1555,13 +1571,13 @@ function formatLanguageLabel(lang) {
     .replace(/language-/i, '')
     .replace(/[\W_]+/g, ' ')
     .trim()
-    .replace(/\b\w/g, letter => letter.toUpperCase());
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function decorateCodeBlock(block) {
   const pre = block.closest('pre');
   if (!pre) return;
-  const languageClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
+  const languageClass = Array.from(block.classList).find((cls) => cls.startsWith('language-'));
   const detected =
     languageClass ||
     block.getAttribute('data-language') ||
@@ -1619,7 +1635,7 @@ function hydrateTheme() {
   setTheme(theme);
 }
 
-editor.addEventListener('input', event => {
+editor.addEventListener('input', (event) => {
   const value = event.target.value;
   updatePreview(value);
   updateStats(value);
@@ -1639,12 +1655,12 @@ btnToggleTheme.addEventListener('click', () => {
   setTheme(next);
 });
 
-fileInput.addEventListener('change', event => {
+fileInput.addEventListener('change', (event) => {
   const [file] = event.target.files;
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = (e) => {
     const content = String(e.target.result);
     editor.value = content;
     editor.dispatchEvent(new Event('input'));
@@ -1689,7 +1705,7 @@ if (btnCopyDocs) {
   });
 }
 
-preview.addEventListener('change', event => {
+preview.addEventListener('change', (event) => {
   const target = event.target;
   if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') {
     return;
@@ -1717,7 +1733,7 @@ initializeSettingsUI();
 
 // Respond to OS theme changes dynamically
 const themeWatcher = window.matchMedia('(prefers-color-scheme: dark)');
-const handleSystemTheme = event => {
+const handleSystemTheme = (event) => {
   const stored = localStorage.getItem(STORAGE_KEYS.THEME);
   if (!stored) {
     setTheme(event.matches ? 'dark' : 'light');
@@ -1731,8 +1747,8 @@ if (typeof themeWatcher.addEventListener === 'function') {
 }
 
 // Drag & drop support for markdown files
-['dragenter', 'dragover'].forEach(eventName => {
-  document.addEventListener(eventName, event => {
+['dragenter', 'dragover'].forEach((eventName) => {
+  document.addEventListener(eventName, (event) => {
     if (!event.dataTransfer) return;
     if (Array.from(event.dataTransfer.types).includes('Files')) {
       event.preventDefault();
@@ -1741,8 +1757,8 @@ if (typeof themeWatcher.addEventListener === 'function') {
   });
 });
 
-['dragleave', 'drop', 'dragend'].forEach(eventName => {
-  document.addEventListener(eventName, event => {
+['dragleave', 'drop', 'dragend'].forEach((eventName) => {
+  document.addEventListener(eventName, (event) => {
     if (event.type === 'drop') {
       event.preventDefault();
       handleDrop(event);
@@ -1752,12 +1768,12 @@ if (typeof themeWatcher.addEventListener === 'function') {
 });
 
 function handleDrop(event) {
-  const files = Array.from(event.dataTransfer.files).filter(file =>
+  const files = Array.from(event.dataTransfer.files).filter((file) =>
     /\.(md|markdown|txt)$/i.test(file.name)
   );
   if (!files.length) return;
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = (e) => {
     const content = String(e.target.result);
     editor.value = content;
     editor.dispatchEvent(new Event('input'));
@@ -1791,9 +1807,10 @@ document.head.appendChild(style);
 // Bookmark toast notification
 const bookmarkCallout = document.getElementById('bookmark-callout');
 const dismissBookmark = document.getElementById('dismiss-bookmark');
+const bookmarkTrigger = document.getElementById('bookmark-trigger');
 
 // Timer in milliseconds (60000 = 1 minute)
-const BOOKMARK_TOAST_DELAY = 60000;
+const BOOKMARK_TOAST_DELAY = 0;
 
 function showBookmarkToast() {
   try {
@@ -1830,6 +1847,26 @@ function hideBookmarkToast() {
 
 if (dismissBookmark) {
   dismissBookmark.addEventListener('click', hideBookmarkToast);
+}
+
+function bookmarkPage() {
+  const url = window.location.href;
+  const title = document.title;
+
+  if (window.sidebar && typeof window.sidebar.addPanel === 'function') {
+    window.sidebar.addPanel(title, url, '');
+  } else if (window.external && typeof window.external.AddFavorite === 'function') {
+    window.external.AddFavorite(url, title);
+  } else {
+    alert('To bookmark this page, please press Ctrl+D (Windows/Linux) or Cmd+D (Mac).');
+  }
+}
+
+if (bookmarkTrigger) {
+  bookmarkTrigger.addEventListener('click', () => {
+    bookmarkPage();
+    hideBookmarkToast();
+  });
 }
 
 // Initialize bookmark toast

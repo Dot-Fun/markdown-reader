@@ -31,6 +31,65 @@ const STORAGE_KEYS = {
   SETTINGS: 'dotfun-studio-preview-settings',
 };
 
+const safeStorage = resolveSafeStorage();
+
+function resolveSafeStorage() {
+  try {
+    if (typeof globalThis === 'undefined' || !('localStorage' in globalThis)) {
+      return null;
+    }
+    const storage = globalThis.localStorage;
+    const testKey = '__dotfun-storage-test__';
+    storage.setItem(testKey, '1');
+    storage.removeItem(testKey);
+    return storage;
+  } catch (error) {
+    return null;
+  }
+}
+
+function storageSet(
+  key,
+  value,
+  { serialize = (input) => input, onErrorMessage } = {}
+) {
+  if (!safeStorage) return false;
+  try {
+    safeStorage.setItem(key, serialize(value));
+    return true;
+  } catch (error) {
+    if (onErrorMessage) {
+      console.warn(`${onErrorMessage}:`, error);
+    } else {
+      console.warn(`Unable to persist ${key}:`, error);
+    }
+    return false;
+  }
+}
+
+function storageGet(
+  key,
+  { parse = (input) => input, fallback = null, onErrorMessage } = {}
+) {
+  if (!safeStorage) {
+    return fallback;
+  }
+  try {
+    const raw = safeStorage.getItem(key);
+    if (raw === null || raw === undefined) {
+      return fallback;
+    }
+    return parse(raw);
+  } catch (error) {
+    if (onErrorMessage) {
+      console.warn(`${onErrorMessage}:`, error);
+    } else {
+      console.warn(`Unable to read ${key}:`, error);
+    }
+    return fallback;
+  }
+}
+
 const sampleDoc = `# dotfun Field Kit
 
 Welcome to the **dotfun markdown studio**, your rapid space for shipping content, creative, and campaign notes in the dotfun house style.
@@ -290,6 +349,13 @@ const DEFAULT_SETTINGS = {
   codeTheme: 'system',
 };
 
+const PREVIEW_SETTING_CONSTRAINTS = {
+  textScale: { min: 0.9, max: 1.2, precision: 2 },
+  lineHeight: { min: 1.4, max: 2, precision: 2 },
+  contentWidth: { min: 60, max: 90, precision: 0 },
+  paragraphSpacing: { min: 0.8, max: 1.6, precision: 2 },
+};
+
 const VALID_FONT_KEYS = new Set(Object.keys(PREVIEW_FONT_FAMILIES));
 const VALID_HEADING_KEYS = new Set(Object.keys(PREVIEW_HEADING_FAMILIES));
 const VALID_HEADING_WEIGHTS = new Set(Object.keys(HEADING_WEIGHT_LABELS));
@@ -307,6 +373,16 @@ function clampNumber(value, min, max, fallback) {
   const number = Number(value);
   if (Number.isNaN(number)) return fallback;
   return Math.min(Math.max(number, min), max);
+}
+
+function clampWithPrecision(value, constraint, fallback) {
+  const { min, max, precision } = constraint;
+  const clamped = clampNumber(value, min, max, fallback);
+  if (typeof precision !== 'number') {
+    return clamped;
+  }
+  const factor = 10 ** precision;
+  return Math.round(clamped * factor) / factor;
 }
 
 function parseColor(color) {
@@ -427,6 +503,38 @@ function normalizeColorInputValue(color, fallback) {
   }
   const toHex = (component) => component.toString(16).padStart(2, '0');
   return `#${toHex(parsed.r)}${toHex(parsed.g)}${toHex(parsed.b)}`.toUpperCase();
+}
+
+function normalizePreviewSettings(rawSettings) {
+  const merged =
+    rawSettings && typeof rawSettings === 'object'
+      ? { ...DEFAULT_SETTINGS, ...rawSettings }
+      : { ...DEFAULT_SETTINGS };
+
+  if (!VALID_FONT_KEYS.has(merged.fontFamily)) {
+    merged.fontFamily = DEFAULT_SETTINGS.fontFamily;
+  }
+  if (!VALID_HEADING_KEYS.has(merged.headingFont)) {
+    merged.headingFont = DEFAULT_SETTINGS.headingFont;
+  }
+  if (VALID_HEADING_WEIGHTS.has(String(merged.headingWeight))) {
+    merged.headingWeight = String(merged.headingWeight);
+  } else {
+    merged.headingWeight = DEFAULT_SETTINGS.headingWeight;
+  }
+  if (!VALID_CODE_THEMES.has(merged.codeTheme)) {
+    merged.codeTheme = DEFAULT_SETTINGS.codeTheme;
+  }
+
+  Object.entries(PREVIEW_SETTING_CONSTRAINTS).forEach(([key, constraint]) => {
+    merged[key] = clampWithPrecision(merged[key], constraint, DEFAULT_SETTINGS[key]);
+  });
+
+  merged.accentColor = sanitizeColorValue(merged.accentColor);
+  merged.backgroundColor = sanitizeColorValue(merged.backgroundColor);
+  merged.textColor = sanitizeColorValue(merged.textColor);
+
+  return merged;
 }
 
 function formatNumber(value, decimals = 2) {
@@ -658,99 +766,72 @@ function setPreviewVar(name, value) {
   });
 }
 
+const PREVIEW_TOKEN_VAR_MAP = [
+  ['fontSans', '--preview-font-sans'],
+  ['headingFont', '--preview-heading-font'],
+  ['headingWeight', '--preview-heading-weight'],
+  ['fontScale', '--preview-font-scale', (value) => String(value)],
+  ['lineHeight', '--preview-line-height', (value) => String(value)],
+  ['paragraphSpacing', '--preview-paragraph-spacing'],
+  ['contentWidth', '--preview-content-width'],
+  ['text', '--preview-text'],
+  ['muted', '--preview-muted'],
+  ['background', '--preview-surface'],
+  ['surfaceAlt', '--preview-surface-alt'],
+  ['accent', '--preview-accent'],
+  ['accentSoft', '--preview-accent-soft'],
+  ['accentShadow', '--preview-accent-shadow'],
+  ['codeInlineBg', '--preview-code-inline-bg'],
+  ['codeInlineColor', '--preview-code-inline-color'],
+  ['codeBlockBg', '--preview-code-block-bg'],
+  ['codeBlockBorder', '--preview-code-block-border'],
+  ['codeBadgeBg', '--preview-code-badge-bg'],
+  ['codeBadgeText', '--preview-code-badge-text'],
+  ['codeBlockText', '--preview-code-block-text'],
+  ['tableBorder', '--preview-table-border'],
+  ['tableHeaderBg', '--preview-table-header-bg'],
+  ['tableRowEven', '--preview-table-row-even'],
+  ['hlKeyword', '--preview-hljs-keyword'],
+  ['hlString', '--preview-hljs-string'],
+  ['hlTitle', '--preview-hljs-title'],
+  ['hlNumber', '--preview-hljs-number'],
+  ['hlComment', '--preview-hljs-comment'],
+  ['checkboxBorder', '--preview-checkbox-border'],
+];
+
+function applyPreviewTokenVars(tokens) {
+  PREVIEW_TOKEN_VAR_MAP.forEach(([tokenKey, cssVar, transform]) => {
+    if (!(tokenKey in tokens)) return;
+    const raw = tokens[tokenKey];
+    const value = typeof transform === 'function' ? transform(raw, tokens) : raw;
+    setPreviewVar(cssVar, value);
+  });
+}
+
 function applyPreviewSettings(settings = previewSettings) {
   const tokens = computePreviewTokens(settings);
   if (!tokens) return;
   currentPreviewTokens = tokens;
-  setPreviewVar('--preview-font-sans', tokens.fontSans);
-  setPreviewVar('--preview-heading-font', tokens.headingFont);
-  setPreviewVar('--preview-heading-weight', tokens.headingWeight);
-  setPreviewVar('--preview-font-scale', String(tokens.fontScale));
-  setPreviewVar('--preview-line-height', String(tokens.lineHeight));
-  setPreviewVar('--preview-paragraph-spacing', tokens.paragraphSpacing);
-  setPreviewVar('--preview-content-width', tokens.contentWidth);
-  setPreviewVar('--preview-text', tokens.text);
-  setPreviewVar('--preview-muted', tokens.muted);
-  setPreviewVar('--preview-surface', tokens.background);
-  setPreviewVar('--preview-surface-alt', tokens.surfaceAlt);
-  setPreviewVar('--preview-accent', tokens.accent);
-  setPreviewVar('--preview-accent-soft', tokens.accentSoft);
-  setPreviewVar('--preview-accent-shadow', tokens.accentShadow);
-  setPreviewVar('--preview-code-inline-bg', tokens.codeInlineBg);
-  setPreviewVar('--preview-code-inline-color', tokens.codeInlineColor);
-  setPreviewVar('--preview-code-block-bg', tokens.codeBlockBg);
-  setPreviewVar('--preview-code-block-border', tokens.codeBlockBorder);
-  setPreviewVar('--preview-code-badge-bg', tokens.codeBadgeBg);
-  setPreviewVar('--preview-code-badge-text', tokens.codeBadgeText);
-  setPreviewVar('--preview-code-block-text', tokens.codeBlockText);
-  setPreviewVar('--preview-table-border', tokens.tableBorder);
-  setPreviewVar('--preview-table-header-bg', tokens.tableHeaderBg);
-  setPreviewVar('--preview-table-row-even', tokens.tableRowEven);
-  setPreviewVar('--preview-hljs-keyword', tokens.hlKeyword);
-  setPreviewVar('--preview-hljs-string', tokens.hlString);
-  setPreviewVar('--preview-hljs-title', tokens.hlTitle);
-  setPreviewVar('--preview-hljs-number', tokens.hlNumber);
-  setPreviewVar('--preview-hljs-comment', tokens.hlComment);
-  setPreviewVar('--preview-checkbox-border', tokens.checkboxBorder);
+  applyPreviewTokenVars(tokens);
   updateSettingsValueDisplays();
   markSettingsPreviewDirty();
 }
 
 function savePreviewSettingsSafely() {
-  try {
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(previewSettings));
-  } catch (error) {
-    console.warn('Unable to persist preview settings:', error);
-  }
+  storageSet(STORAGE_KEYS.SETTINGS, previewSettings, {
+    serialize: (value) => JSON.stringify(value),
+    onErrorMessage: 'Unable to persist preview settings',
+  });
 }
 
 function loadPreviewSettings() {
-  let stored = null;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-    if (raw) {
-      stored = JSON.parse(raw);
-    }
-  } catch (error) {
-    console.warn('Unable to read preview settings:', error);
-  }
+  const stored = storageGet(STORAGE_KEYS.SETTINGS, {
+    parse: (value) => JSON.parse(value),
+    fallback: null,
+    onErrorMessage: 'Unable to read preview settings',
+  });
 
-  const merged =
-    stored && typeof stored === 'object'
-      ? { ...DEFAULT_SETTINGS, ...stored }
-      : { ...DEFAULT_SETTINGS };
-
-  if (!VALID_FONT_KEYS.has(merged.fontFamily)) {
-    merged.fontFamily = DEFAULT_SETTINGS.fontFamily;
-  }
-  if (!VALID_HEADING_KEYS.has(merged.headingFont)) {
-    merged.headingFont = DEFAULT_SETTINGS.headingFont;
-  }
-  if (!VALID_HEADING_WEIGHTS.has(String(merged.headingWeight))) {
-    merged.headingWeight = DEFAULT_SETTINGS.headingWeight;
-  } else {
-    merged.headingWeight = String(merged.headingWeight);
-  }
-  if (!VALID_CODE_THEMES.has(merged.codeTheme)) {
-    merged.codeTheme = DEFAULT_SETTINGS.codeTheme;
-  }
-
-  merged.textScale = clampNumber(merged.textScale, 0.9, 1.2, DEFAULT_SETTINGS.textScale);
-  merged.lineHeight =
-    Math.round(clampNumber(merged.lineHeight, 1.4, 2, DEFAULT_SETTINGS.lineHeight) * 100) / 100;
-  merged.contentWidth = Math.round(
-    clampNumber(merged.contentWidth, 60, 90, DEFAULT_SETTINGS.contentWidth)
-  );
-  merged.paragraphSpacing =
-    Math.round(
-      clampNumber(merged.paragraphSpacing, 0.8, 1.6, DEFAULT_SETTINGS.paragraphSpacing) * 100
-    ) / 100;
-
-  merged.accentColor = sanitizeColorValue(merged.accentColor);
-  merged.backgroundColor = sanitizeColorValue(merged.backgroundColor);
-  merged.textColor = sanitizeColorValue(merged.textColor);
-
-  previewSettings = merged;
+  previewSettings = normalizePreviewSettings(stored);
 }
 
 function updateSettingsValueDisplays() {
@@ -1520,24 +1601,17 @@ function updateStats(markdown) {
 }
 
 function persistContent(markdown) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.CONTENT, markdown);
-  } catch (error) {
-    console.warn('Unable to persist markdown content:', error);
-  }
+  storageSet(STORAGE_KEYS.CONTENT, markdown, {
+    onErrorMessage: 'Unable to persist markdown content',
+  });
 }
 
 function hydrateEditor() {
-  let initial = sampleDoc;
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.CONTENT);
-    if (saved) {
-      initial = saved;
-    }
-  } catch (error) {
-    console.warn('Unable to read saved markdown:', error);
-  }
-
+  const saved = storageGet(STORAGE_KEYS.CONTENT, {
+    fallback: null,
+    onErrorMessage: 'Unable to read saved markdown',
+  });
+  const initial = typeof saved === 'string' && saved ? saved : sampleDoc;
   editor.value = initial;
   updatePreview(initial);
   updateStats(initial);
@@ -1548,11 +1622,9 @@ function setTheme(nextTheme) {
   appRoot.dataset.theme = theme;
   document.body.dataset.theme = theme;
   themeIndicator.textContent = theme === 'dark' ? 'Dark' : 'Light';
-  try {
-    localStorage.setItem(STORAGE_KEYS.THEME, theme);
-  } catch (error) {
-    console.warn('Unable to persist theme preference:', error);
-  }
+  storageSet(STORAGE_KEYS.THEME, theme, {
+    onErrorMessage: 'Unable to persist theme preference',
+  });
   applyPreviewSettings(previewSettings);
   toggleHighlightStyles(theme);
 }
@@ -1623,16 +1695,17 @@ async function copyPreviewForDocs() {
 }
 
 function hydrateTheme() {
-  let theme = 'light';
-  try {
-    const stored = localStorage.getItem(STORAGE_KEYS.THEME);
-    if (stored) {
-      theme = stored;
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      theme = 'dark';
-    }
-  } catch (error) {
-    console.warn('Unable to read stored theme:', error);
+  const stored = storageGet(STORAGE_KEYS.THEME, {
+    fallback: null,
+    onErrorMessage: 'Unable to read stored theme',
+  });
+  let theme = typeof stored === 'string' && stored ? stored : null;
+  if (!theme) {
+    const prefersDark =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+    theme = prefersDark ? 'dark' : 'light';
   }
   setTheme(theme);
 }
@@ -1736,7 +1809,7 @@ initializeSettingsUI();
 // Respond to OS theme changes dynamically
 const themeWatcher = window.matchMedia('(prefers-color-scheme: dark)');
 const handleSystemTheme = (event) => {
-  const stored = localStorage.getItem(STORAGE_KEYS.THEME);
+  const stored = storageGet(STORAGE_KEYS.THEME, { fallback: null });
   if (!stored) {
     setTheme(event.matches ? 'dark' : 'light');
   }
@@ -1814,13 +1887,12 @@ const dismissBookmark = document.getElementById('dismiss-bookmark');
 const BOOKMARK_TOAST_DELAY = 60000;
 
 function showBookmarkToast() {
-  try {
-    const dismissed = localStorage.getItem(STORAGE_KEYS.BOOKMARK_DISMISSED);
-    if (dismissed === 'true') {
-      return;
-    }
-  } catch (error) {
-    console.warn('Unable to check bookmark toast state:', error);
+  const dismissed = storageGet(STORAGE_KEYS.BOOKMARK_DISMISSED, {
+    fallback: 'false',
+    onErrorMessage: 'Unable to check bookmark toast state',
+  });
+  if (dismissed === 'true') {
+    return;
   }
 
   setTimeout(() => {
@@ -1835,11 +1907,9 @@ function hideBookmarkToast() {
 
   bookmarkCallout.classList.remove('is-visible');
 
-  try {
-    localStorage.setItem(STORAGE_KEYS.BOOKMARK_DISMISSED, 'true');
-  } catch (error) {
-    console.warn('Unable to save bookmark toast state:', error);
-  }
+  storageSet(STORAGE_KEYS.BOOKMARK_DISMISSED, 'true', {
+    onErrorMessage: 'Unable to save bookmark toast state',
+  });
 
   setTimeout(() => {
     bookmarkCallout.classList.add('is-hidden');

@@ -43,14 +43,16 @@ No build tooling is required; open `index.html` in a browser to run the experien
 - The bookmark toast intentionally waits 60 seconds before revealing. Update `BOOKMARK_TOAST_DELAY` in `app.js` alongside the timing assertion in `tests/integration/bookmark-toast.test.cjs` if you need a different cadence.
 - Settings dropdowns (`.settings__field select`) keep the iOS-style double-linear-gradient caret. The background position is centered vertically, and the dark-theme override swaps in a warm neutral surface (`rgba(41, 29, 18, 0.92)`) with subtle border contrast. When adjusting form controls, tweak the token-driven background first, then the gradients for the caret if alignment shifts.
 - Range sliders and other inputs reuse the same accent variables; favour adjusting the tokens near the top of `styles.css` to propagate changes across the modal rather than editing individual component colours.
+- Local storage access is wrapped by `safeStorage`, `storageGet`, and `storageSet`. When persisting new data, use those helpers so SSR/tests can stub storage gracefully without repeating try/catch boilerplate.
+- Preview theme tokens now map through `PREVIEW_TOKEN_VAR_MAP` + `applyPreviewTokenVars`. Extend the map instead of adding new `setPreviewVar` calls when introducing additional CSS custom properties.
 
 ---
 
 ## JavaScript Structure
 
-1. **Configuration / Constants** – storage keys, sample document, helper for export attribution.
+1. **Configuration / Constants** – storage keys, sample document, helper for export attribution, `safeStorage` utilities.
 2. **Markdown Helpers** – footnote extraction, footnote rendering, task discovery.
-3. **Preview Pipeline** – `updatePreview`, `updateStats`, highlight + code badge decorators.
+3. **Preview Pipeline** – `updatePreview`, `updateStats`, highlight + code badge decorators, preview token computation.
 4. **Clipboard & Export** – `copyPreviewForDocs`, `buildExportAttribution`, `flashMessage`.
 5. **Event Wiring** – editor input, toolbar buttons, clipboard actions, drag & drop, theme persistence.
 

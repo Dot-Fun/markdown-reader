@@ -1811,7 +1811,7 @@ const bookmarkCallout = document.getElementById('bookmark-callout');
 const dismissBookmark = document.getElementById('dismiss-bookmark');
 
 // Timer in milliseconds (60000 = 1 minute)
-const BOOKMARK_TOAST_DELAY = 0;
+const BOOKMARK_TOAST_DELAY = 60000;
 
 function showBookmarkToast() {
   try {

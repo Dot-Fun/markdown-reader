@@ -40,6 +40,7 @@ No build tooling is required; open `index.html` in a browser to run the experien
 
 - `setTheme` in `app.js` mirrors the active theme onto both `.app` and `body` via `dataset.theme`. This ensures sibling UI (e.g., the bookmark callout appended after the app container) inherits the correct dark-mode token set. When adding new theme-aware elements outside `.app`, rely on the shared CSS variables instead of duplicating colour declarations.
 - The bookmark toast (`.bookmark-callout`) uses `--text`/`--accent` tokens for all states. Dark-mode overrides simply adjust the underlying custom property, keeping light/dark parity without duplicating component rules.
+- The bookmark toast intentionally waits 60 seconds before revealing. Update `BOOKMARK_TOAST_DELAY` in `app.js` alongside the timing assertion in `tests/integration/bookmark-toast.test.cjs` if you need a different cadence.
 - Settings dropdowns (`.settings__field select`) keep the iOS-style double-linear-gradient caret. The background position is centered vertically, and the dark-theme override swaps in a warm neutral surface (`rgba(41, 29, 18, 0.92)`) with subtle border contrast. When adjusting form controls, tweak the token-driven background first, then the gradients for the caret if alignment shifts.
 - Range sliders and other inputs reuse the same accent variables; favour adjusting the tokens near the top of `styles.css` to propagate changes across the modal rather than editing individual component colours.
 

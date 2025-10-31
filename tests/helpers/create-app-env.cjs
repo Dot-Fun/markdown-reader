@@ -108,6 +108,7 @@ function createAppEnv(options = {}) {
   const {
     storage = {},
     systemPrefersDark = false,
+    captureTimers = false,
   } = options;
   const dom = new JSDOM(APP_HTML, {
     url: 'https://dotfun.test',
@@ -117,6 +118,22 @@ function createAppEnv(options = {}) {
 
   const { window } = dom;
   const { document } = window;
+
+  const timeoutLog = [];
+
+  if (captureTimers) {
+    const originalSetTimeout = window.setTimeout.bind(window);
+    window.setTimeout = (callback, delay, ...args) => {
+      const delayMs = Number(delay ?? 0);
+      const handle = originalSetTimeout(callback, delayMs, ...args);
+      timeoutLog.push({
+        delay: Number.isNaN(delayMs) ? 0 : delayMs,
+        callbackName:
+          typeof callback === 'function' && callback.name ? callback.name : null,
+      });
+      return handle;
+    };
+  }
 
   if (!window.requestAnimationFrame) {
     window.requestAnimationFrame = (callback) => setTimeout(callback, 0);
@@ -232,6 +249,9 @@ function createAppEnv(options = {}) {
       formatLanguageLabel: getFn('formatLanguageLabel'),
       decorateCodeBlock: getFn('decorateCodeBlock'),
       getPreviewTokens: getFn('getPreviewTokens'),
+    },
+    timers: {
+      timeouts: timeoutLog,
     },
   };
 

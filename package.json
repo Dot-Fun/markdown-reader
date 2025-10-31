@@ -1,0 +1,29 @@
+{
+  "name": "markdown-reader",
+  "version": "1.0.0",
+  "description": "This project hosts the dotfun-branded markdown editor showcased at `dotfun.co/tools/markdown-studio`.   It’s a static web app composed of three files:",
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node --test --experimental-test-coverage tests/**/*.test.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dot-Fun/markdown-reader.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dot-Fun/markdown-reader/issues"
+  },
+  "homepage": "https://github.com/Dot-Fun/markdown-reader#readme",
+  "devDependencies": {
+    "dompurify": "^3.3.0",
+    "highlight.js": "^11.11.1",
+    "jsdom": "^27.1.0",
+    "marked": "^16.4.1"
+  }
+}

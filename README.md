@@ -79,14 +79,23 @@ Manual checklist when editing core behaviour:
 
 ### Automated Regressions
 
-- Prerequisite: Node.js 18+ (the repo root already pins this via `engines.node`).
-- Run `node --test tests/ui-integrity.test.cjs` from the project root to execute the DOM/CSS guardrails.
-- Coverage highlights:
-  - Confirms dark-mode tokens are applied to both `.app` and `body`, and that the shared `--text` token remains the warm ivory needed by the bookmark toast.
-  - Verifies the bookmark callout action + text overrides continue using the shared token pipeline in dark mode.
-  - Locks the settings dropdown caret alignment and dark-surface background colour so future tweaks don’t drift.
-  - Ensures the header brand glyph stays a perfect 42px circle with the nested accent dot.
-  - Checks `setTheme` in `app.js` keeps mirroring theme state to `document.body.dataset.theme`.
+- Prerequisites: Node.js 18+ and `npm install` from the project root.
+- Run `npm test` to execute every unit + integration suite under `tests/` via the Node test runner.
+  - The command enables Node’s experimental coverage flag, so a summary table prints at the end and raw data lands in the `coverage/` directory (handy for CI or IDE tooling).
+  - DOM-heavy integration suites live in `tests/integration/`, powered by a jsdom harness (`tests/helpers/create-app-env.cjs`) that loads the real `app.js`.
+  - Focused unit specs sit in `tests/unit/` and assert colour utilities, footnote parsing, stats helpers, and preview setting clamps.
+- When triaging a failure, re-run an individual file with `node --test --experimental-test-coverage path/to/test.cjs` to keep the coverage report intact.
+
+Coverage highlights:
+- Verifies theme tokens still land on both `.app` and `body`, and that the bookmark toast inherits the shared palette.
+- Guards the settings modal caret alignment, range inputs, and code-theme overrides across light/dark modes.
+- Exercises the full markdown pipeline, ensuring sanitisation, code highlighting, and task-list syncing stay in lockstep.
+- Confirms export payloads carry inline CSS, attribution, and rich clipboard fallbacks.
+
+Whenever you add features, ship corresponding coverage:
+- Integration specs in `tests/integration/` should prove the end-to-end behaviour against the real `app.js` via `createAppEnv`.
+- Unit specs in `tests/unit/` should lock down new helpers or utilities you introduce.
+- Update the README and test harness when you add new DOM affordances so the next agent—or your future self—can trace how to exercise them.
 
 ---
 

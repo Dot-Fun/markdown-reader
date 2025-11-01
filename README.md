@@ -20,6 +20,7 @@ No build tooling is required; open `index.html` in a browser to run the experien
 | Task list sync | `extractTaskItems`, `toggleTaskItem`, `preview` `change` listener | Clicking a checkbox in the preview rewrites the editor markdown so source and preview stay aligned. |
 | Footnotes | `preprocessFootnotes`, `renderFootnoteSection` | Renders references and keeps the ↩︎ link inline with content. |
 | Copy actions | `btnCopyHtml` + `btnCopyDocs` handlers | Copy HTML appends an attribution footer. Copy for Docs clones the preview, injects inline styles + attribution, writes HTML and plaintext to the clipboard. |
+| Shareable links | `app.js` (`btnShare`, share helpers) | Serialises markdown, preview settings, and theme into a compressed URL param, updates the address bar, and copies the link to the clipboard. |
 | Bookmark toast | Styles in `styles.css` (`.bookmark-callout`)* + toast timers in `app.js` | Toast reveals after 60s, explains keyboard shortcuts, and respects dismiss state via localStorage. |
 | Preview settings modal | `.settings__sheet`, `.settings__content`, `settingsPreview` helpers | Modal now mirrors live preview tokens and has its own scroll container; close button is positioned outside scroll area. |
 | Dotfun feature list | `index.html` (`.app__features`) | SEO-oriented content block after the footer. |
@@ -45,6 +46,14 @@ No build tooling is required; open `index.html` in a browser to run the experien
 - Range sliders and other inputs reuse the same accent variables; favour adjusting the tokens near the top of `styles.css` to propagate changes across the modal rather than editing individual component colours.
 - Local storage access is wrapped by `safeStorage`, `storageGet`, and `storageSet`. When persisting new data, use those helpers so SSR/tests can stub storage gracefully without repeating try/catch boilerplate.
 - Preview theme tokens now map through `PREVIEW_TOKEN_VAR_MAP` + `applyPreviewTokenVars`. Extend the map instead of adding new `setPreviewVar` calls when introducing additional CSS custom properties.
+
+### Share Links
+
+- The toolbar’s **Share Link** button (`#btn-share`) calls `serializeShareStatePayload` in `app.js`. The helper builds a payload with `createShareStatePayload`, which pulls preview settings directly from `DEFAULT_SETTINGS`. That means newly introduced settings are automatically included in share links as soon as they are added to the defaults.
+- Each payload captures a schema version (`SHARE_STATE_VERSION`), the active theme, the current markdown, and the normalised preview settings. Data is compressed with the URI-safe LZ codec returned by `createShareCodec`, keeping query strings compact even for longer documents.
+- State changes automatically schedule a new payload via `scheduleShareUrlUpdate`, so the `?share=...` query always mirrors the latest markdown, theme, and settings. The toolbar button simply calls `forceShareUrlUpdate` to copy the already-current URL (with a fallback to `document.execCommand('copy')` when the modern Clipboard API isn’t available).
+- On load, `readSharedStateFromUrl` runs before hydration. If a share payload is present it seeds the preview settings, theme, and editor content before the rest of the app initialises, and then persists those values to localStorage so reloads stay in sync.
+- Evolving the schema: bump `SHARE_STATE_VERSION` when you store new fields, extend `createShareStatePayload` to write them, and update `readSharedStateFromUrl` to interpret older payloads (e.g., supply defaults when a field is missing). Reuse existing helpers such as `normalizePreviewSettings` to validate incoming data instead of adding bespoke guards.
 
 ---
 

@@ -46,6 +46,7 @@ No build tooling is required; open `index.html` in a browser to run the experien
 - Range sliders and other inputs reuse the same accent variables; favour adjusting the tokens near the top of `styles.css` to propagate changes across the modal rather than editing individual component colours.
 - Local storage access is wrapped by `safeStorage`, `storageGet`, and `storageSet`. When persisting new data, use those helpers so SSR/tests can stub storage gracefully without repeating try/catch boilerplate.
 - Preview theme tokens now map through `PREVIEW_TOKEN_VAR_MAP` + `applyPreviewTokenVars`. Extend the map instead of adding new `setPreviewVar` calls when introducing additional CSS custom properties.
+- Icons are sourced from Font Awesome 6 (loaded via CDN in `index.html`). The settings button uses `fa-gear`, and the theme toggle swaps between `fa-sun`/`fa-moon` using the existing `.theme-icon` visibility rules.
 
 ### Share Links
 

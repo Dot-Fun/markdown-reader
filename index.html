@@ -12,6 +12,11 @@
     />
     <link
       rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css"
       id="hljs-theme-light"
     />
@@ -48,47 +53,11 @@
           <button
             type="button"
             class="toolbar__button toolbar__button--icon"
-            id="btn-open-settings"
-            aria-label="Preview settings"
-            aria-haspopup="dialog"
-            aria-expanded="false"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-cog-icon lucide-cog"
-            >
-              <path d="M11 10.27 7 3.34" />
-              <path d="m11 13.73-4 6.93" />
-              <path d="M12 22v-2" />
-              <path d="M12 2v2" />
-              <path d="M14 12h8" />
-              <path d="m17 20.66-1-1.73" />
-              <path d="m17 3.34-1 1.73" />
-              <path d="M2 12h2" />
-              <path d="m20.66 17-1.73-1" />
-              <path d="m20.66 7-1.73 1" />
-              <path d="m3.34 17 1.73-1" />
-              <path d="m3.34 7 1.73 1" />
-              <circle cx="12" cy="12" r="2" />
-              <circle cx="12" cy="12" r="8" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            class="toolbar__button toolbar__button--icon"
             id="btn-toggle-theme"
             aria-label="Toggle theme"
           >
-            <span class="theme-icon" data-theme="light" aria-hidden="true">☀︎</span>
-            <span class="theme-icon" data-theme="dark" aria-hidden="true">☾</span>
+            <i class="theme-icon fa-solid fa-sun" data-theme="light" aria-hidden="true"></i>
+            <i class="theme-icon fa-solid fa-moon" data-theme="dark" aria-hidden="true"></i>
           </button>
         </div>
       </header>
@@ -110,6 +79,16 @@
             <h2>Preview</h2>
             <div class="pane-meta">
               <span id="theme-indicator">Light</span>
+              <button
+                type="button"
+                class="toolbar__button toolbar__button--icon toolbar__button--icon--compact"
+                id="btn-open-settings"
+                aria-label="Preview settings"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <i class="fa-solid fa-gear" aria-hidden="true"></i>
+              </button>
             </div>
           </div>
           <article id="preview" class="markdown-body"></article>

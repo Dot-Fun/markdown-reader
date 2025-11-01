@@ -405,6 +405,33 @@ body.is-settings-open {
   transform: translateY(-1px);
 }
 
+.toolbar__button--icon i {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.toolbar__button--icon--compact {
+  width: 38px;
+  height: 38px;
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+.workspace__pane--preview .toolbar__button--icon--compact {
+  background-color: var(--preview-surface, var(--surface));
+  color: var(--preview-text, var(--text));
+  box-shadow: inset 0 0 0 1.5px var(--preview-accent, var(--accent));
+}
+
+.workspace__pane--preview .toolbar__button--icon--compact:hover,
+.workspace__pane--preview .toolbar__button--icon--compact:focus-visible {
+  background-color: var(--preview-accent, var(--accent));
+  color: var(--preview-surface, var(--surface));
+}
+
+.workspace__pane--preview .toolbar__button--icon--compact:active {
+  transform: translateY(0);
+}
+
 .theme-icon {
   display: none;
   font-size: 1.1rem;
@@ -480,6 +507,9 @@ body.is-settings-open {
 .pane-meta {
   font-size: 0.85rem;
   color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .workspace__pane--editor textarea {
